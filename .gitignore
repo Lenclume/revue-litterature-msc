@@ -1,0 +1,21 @@
+# WARNING : This .gitignore ignore every file by default. Add every exception you need to push.
+# Ignore everything
+*
+
+# Allow whitelisting subdirectories
+!*/
+
+# Don't ignore this file
+!.gitignore
+
+
+# Don't ignore TeX files
+!*.tex
+!*.bib
+!*.bst
+!*.eps
+!*.pdf
+
+# Don't ignore markdown files
+!*.md
+
