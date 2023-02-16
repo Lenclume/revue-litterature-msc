@@ -1,0 +1,130 @@
+% Résumé de lecture
+
+\subsection{An exhaustive survey on P4 programmable data plane switches: taxonomy, applications, challenges, and future trends, \cite{kfoury_exhaustive_2021}, Kfoury et al., Mai 2021}
+\gras{Pertinence:} 3 (excellente revue des domaines d'applications des commutateurs programmables). Les sections VI-XII pas analysées dans le détail.
+\gras{Sujets:} télémétrie, \emph{load-balancing}, \emph{in-network computing}, \emph{middlebox functions}, IoT, sécurité, tests et vérification.
+
+\gras{Problématique:} Quel est l'état de l'art des commutateurs à plan de données programmables, et dans quelles directions vont-ils continuer à évoluer?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Les équipements réseau numériques ont commencé dans un paradigme propriétaire, inflexible car de conception fermée. Le besoin d'interopérabilité et de standardisation a fait en sorte, dans ce paradigme, qu'il est extrêmement difficile de changer un protocole existant - la pile réseau s'\og ossifie \fg. Dans les quelques dernières années on a flexibilisé le plan de contrôle avec SDN, mais le plan de données est resté fixe. L'étape suivante naturelle a été l'émergeance de plan de données programmables, dont le P4 est devenu le langage standard de-facto. De nouvelles architectures de commutateurs en ont résultées. Les équipements propriétaires traditionnels vont être lentement mais surement remplacés par des équipements programmables.
+
+\gras{Table des matières:}
+
+\setlist[enumerate, 1]{label=\Roman*}
+\begin{enumerate}
+	\item Introduction
+	\item Related surveys
+	\item Traditional switches and SDN
+	\item Programmable switches
+	\item Methodology and taxonomy
+	\item Surveyed work
+	\setlist[enumerate, 2]{label=\Roman*}
+	\begin{enumerate}
+		\item In-band Network Telemetry
+		\item Network performance
+		\item Middlebox functions
+		\item In-network computing
+		\item IoT
+		\item Cybersecurity and attacks
+		\item Network and P4 Testing
+	\end{enumerate}
+	\item Challenges and future trends
+	\setlist[enumerate, 2]{label=\Alph*}
+	\begin{enumerate}
+		\item Memory capacity (SRAM \& TCAM)
+		\item Resource accessibility
+		\item Arithmetic computations
+		\item Network cooperation
+		\item Control-plane intervention
+		\item Security
+		\item Interoperability
+		\item Programming simplicity
+		\item Deep programmability
+		\item Modularity and virtualization
+		\item Practical testing
+	\end{enumerate}
+	\item Conclusion
+\end{enumerate}
+
+\gras{Résumé:}
+
+I - L'ossification des protocoles a eu lieu et est la conséquence directe du mainmise d'une poignée de fabricants d'équipement réseau sur le marché, utilisant des designs propriétaires non-reconfigurables. Le nombre de RFC sur les protocoles standards explose depuis les années 1990-2000, ce qui montre qu'il est difficile de faire changer un protocole pour soi sans forcer un changement au protocole sur tout le standard. Cela suggère qu'il faut changer de paradigme si l'on veut permettre à nouveau une innovation rapide sur les protocoles.
+
+II - Jusqu'à ce jour il n'existait aucune revue exhaustive et extensive du langage P4. Les revues existantes ciblent des aspects spécifiques du domaine: Stubb sur les compilateurs et interpréteurs; Darghali sur la sécurité. Cordeiro sur les fonctionnalité et possibilités du langage. Satapathy sur l'évolution depuis les équipments fixes jusqu'à la SDN, puis au plan de données programmable. Bifulco sur la taxonomie des commutateurs programmables. Kaljic sur la SDN en général. Kamman sur la SDN aussi, mais en touchant aussi à la télémétrie et au \emph{in-network computing}. Tan sur l'évolution de la télémétrie pré-SDN, avec SDN, et avec le P4. Zhang sur le traitement \emph{stateful}.
+
+III - La SDN permet aux opérateurs de diriger le plan de contrôle depuis un point central. Le P4 étend la SDN, la rend indépendante de la cible ([en principe!]). En règle générale, le cours naturel des technologies set d'évoluer du matériel et des langages fixes à des équipments programmables et programmés dans des langages haut-niveau. PISA est une architecture générique de cible pour le P4, de la même manière que le x86 est une architecture générale pour les CPUs programmés en C.
+
+IV - PISA est le gabarit d'architecture d'un commutateur générique. Il définit le modèle général d'un parseur comme machine à état, suivi d'une chaîne de tables d'actions, elles-même composées de blocs de mémoires et de petits 'ALUs', le tout terminé par un sérialiseur programmable. Le $P4_{16}$ a étendu le $P4_{14}$ pour s'adapter à plus de cibles.
+
+Avantages des commutateurs programmables: ils rendent l'adoption de nouvelles révisions plus rapide, renversent le flot de développement de \emph{bottom-up} à \emph{top-down}. Les opérateurs réseaux peuvent créer de nouvelles fonctionnalités pour obtenir un avantage compétitif sans avoir à le partager (ou le faire adopter dans un standard). Contrairement à ce à quoi on pourrait s'attendre, les équipements programmables améliorent la performance parce qu'ils peuvent ne contenir que les fonctionnalités dont on a besoin; là où les ASICs fixes doivent incorporer tout un tas de fonctionnalités secondaires, dont la grande majorité ne sera jamais utilisées, juste au cas-où.
+
+L'écart de performances entre les puces de commutations et la commutation par CPU l'élargit de plus en plus: $\fois5-10$ en 1990-2000, $\fois 100$ maintenant. Cela s'explique par les multiples niveaux de parallélisme exploitables dans un ASIC/puce programmable: pipelinage entre l'\emph{ingress} et l'\emph{egress}, traitement de plusieurs entêtes en parallèle. En fait, le traitement parallèle de plusieurs champs en même temps fait que le commutateur se comporte comme un processeur VLIW, où l'entête du paquet est comme une longue instruction.
+
+V - L'immense majorité (90 \%) des publications sur le P4 utilise soit des simulateurs comportementaux ([j'imagine BMv2]), soit des ASICs. Le 10\% restant fonctionne avec des smartNIC ou le NetFPGA.
+
+Les sections VI-XII passent en revue toutes les applications possibles de la recherche dans le domaine.
+
+VI - La INT est standardisée et spécifiée dans un document rédigé par Barefoot et d'autre entreprises du secteur. La INT donne beaucoup plus de visibilité sur le réseau que les outils du style \texttt{ping} et \texttt{traceroute}.
+
+Fonctionnement standard de la télémétrie: un premier terminal étiqueté 'source INT' insère une entête 'instruction INT' n'importe où entre les entêtes existantes (pour ça reste flexible et indépendant du protocole). Celle-ci indique aux prochains routeurs traversés quelles mesures prendre. À chaque saut l'équipement ajoute une entête contenant les données récoltées d'après l'instruction. En bout de chaîne, le dernier saut enlève toutes les entêtes INT du packet et les poussent vers un noeud `INT collector' qui en fait l'aggrégation. Le reste du paquet est transmis à sa destination normalement, tout le processus de INT est transparent du point de vue de celle-ci.
+
+La recherche actuelle en INT essaie de réduire son coût d'\emph{overhead} et de simplifier le traitement des données au collecteur.
+
+VII - Les principaux problèmes de performance traîtés par la recherche P4 sont le contrôle de congestion et la gestion des file (AQM, Active Queue Management), les mesures de performance et les diagnostiques.
+
+La plupart des mesures marchent avec des protocoles basées sur des requêtes, mais pour l'instant rien n'est standardisé/optimisé. La CC (contrôle de congestion) et la QoS (les deux sont liés) s'implémentent en séparant le traffic entre les équipements et en ralentissant le traffic à la source (\emph{throttling sender traffic}), le tout en exploitant les données de télémétrie et l'inspection jusqu'à la couche application.
+
+VIII - Définition de \emph{middlebox}: équipement réseau utilisé pour réaliser n'importe quelle fonction autre que la commutation/routage classique, ex. NAT, conversion 4à6, 6à4, pare-feu.
+
+Fonctions les plus étudiées en P4 : équilibrage des charges (demande du \emph{stateful processing}); les caches sur le réseau (\emph{in-network caches}) peuvent fonctionner mais demandent encore plus de travail: compression, choix des données à mettre en cache, minimisation de l'impact sur les performances globales; décharge de fonctions télécom (?), utiliser directement les commutateurs comme \emph{broker} de protocoles comme MQTT.
+
+IX - Principaux candidats pour accélération-sur-réseau (\emph{in-network acceleration}): détermination du consensus dans les algorithmes par vote, phase d'aggrégation dans l'apprentissage machine. Pour le moment toutes ces pistes sont étudiées mais on ne fait tourner que des versions simplifiées des protocoles en question.
+
+X - Les commutateurs intelligents peuvent aggréger les paquets de plusieurs appareils IoT en un seul avant de l'expédier. L'intérêt de l'aggrégation vient de la petite taille des données typiquement émises par ces appareils: les entêtes représentent une grosse part du coût des données. Le paquet aggrégé n'a qu'une seul entête et économise donc une partie des coûts. Mais ça se fait au prix qu'une latence allongée, puisqu'on attend que plusieurs paquets arrivent avant de les expédier.
+
+XI - Les comm. int. peuvent agir sur la sécurité à toutes les couches du réseau.
+
+Principaux usage: détection des \emph{heavy-hitters} (client utilisant une bande-passante trop large ou ayant un nombre anormalement élevé de connexions ouvertes) distribuée sur plusieurs commutateurs; sans télémétrie P4 on ne peut pas les détecter si leur traffic anormal est distribué entre plusieurs commutateurs/routeurs.
+
+Autres fonctions de sécurité étudiées: implémentation de cryptographie sur le commutateur (pour le moment laissée aux terminaux), obfuscation de la topologie, cacher les entêtes de source/destination pour améliorer la vie privée; contremesures: détection DDoS, pare-feus à chaque couche (pas juste L3-L4), filtrage URL, filtrage de mot-clef.
+
+XII - Les méthode de débogage réseau actuelles ne sont pas adaptées au matériel reconfigurable, qui offre beaucoup plus de services peu ou pas standardisés. Les possibilités ajoutées sont autant d'ouverture par les lesquels on introduit des bugs, susceptibles de perturber le réseau. Les travaux futurs pourraient travailler à ajouter de la résilience au réseau, en prévision : auto-diagnostics, auto-réparation à partir des données de télémétrie.
+
+XIII - Défis et travaux futurs:
+
+A - Limites sur la taille des mémoires: certaines applications, entre autres les caches-sur-réseau, font que l'on stocke de plus en plus de données dans de grandes tables.
+$\Rightarrow$ Solution: utiliser des mémoires \emph{off-chip}, mais ça vient avec d'autre limites: bande passante, latence, etc.
+
+B - Les implémentations P4 actuelles n'ont de mécanisme de bassin de ressources (\emph{pooling}), par exemple la mémoire des tables n'est pas partagée, et donc inefficacement utilisée.
+$\Rightarrow$ Solution possible: avoir un bassin de mémoire centralisé et accessible depuis une Xbar? Idem avec des coeurs de processeurs.
+
+C - Les calculs sur réseau sont limités par les contraintes de délais dans les nanosecondes, d'où la limite de leur complexité matérielle. Il n'est pas envisageable, par exemple, de faire du calcul à point flottant. Les applications implémentables sont donc limitées: difficile de faire de l'AQM, de la gestion de traffic, ou de l'apprentissage machine (qui implique généralement des points flottants).
+$\Rightarrow$ Utiliser des approximations de fonctions avec pertes de précision, ou alors laisser le plan de contrôle précalculer des valeurs et stocker les résultats dans des tables.
+
+D - Coopération sur la réseau: l'état du réseau doit être synchronisé entre les commutateurs, par exemple pour la gestion de traffic ou la détection DDoS
+$\Rightarrow$ Il existe des protocoles comme P4Sync pour que les équipements puissent échanger des messages de contrôle entre eux.
+
+E - Les interactions avec le plan de contrôle ralentissent le routage, ex. si un paquet ne correspond à aucune des entrées actuelles de la table. L'article ne suggère pas de solution concrêtes pour minimiser les appels au plan de contrôle.
+
+F - En réponse à tous les problèmes de sécurité, les commutateurs devraient inspecter le traffic pour y repérer les patterns correspondant à des attaques.
+
+G - Interopérabilité: les anciens équipements ne seront pas remplacés d'un coup par des équipements P4, il faut organiser la coexistence des deux pour un remplacement incrémental. L'une des possibilités sera de monter des commutateurs P4 par-dessus les lignes existentes pour écouter le traffic et collecter des données de télémétrie sans perturber le réseau existant.
+
+H - La programmabilité a bien des avantages, mais ammène avec lui les difficultés intrinsèques du logiciel: les bogues inévitables et peuvent rester en production longtemps; la complexité mal gérée, l'élargissement de l'éventail de compétence demandées des opérateurs réseau.
+$\Rightarrow$ Solution possible: des outils de développement plus visuels
+$\Rightarrow$ Le compilation P4All et son extension de langage optimisent l'utilisation des ressources au lieu de la laisser aux programmeurs forcément imparfaits.
+
+I - Dans un avenir plus ou moins lointain on peut envisager un réseau \og programmable en profondeur \fg, dans lequel tout les éléments du réseau (Serveurs, NICs, routeurs) sont programmables et capables de s'ajuster en fonction de la congestion du réseau en utilisant les données de télémétrie (système en boucle ouverte).
+
+J - Reconfiguration à chaud: à l'heure actuelle les équipments sont mis hors-ligne pendant qu'ils sont reconfigurés ex. avec un nouveau programme P4. Il existe plusieurs frameworks implémentant la reconfiguration à chaud, mais tous ont un coût en performances.
+
+K - La plupart des tests et vérifications sont faits en simulations/émulations de réseaux à petite échelle, parce qu'une simulation sur CPU ne peut pas atteindre le niveau de performances d'un réseau réel à grande échelle et à pleine charge. Il faut donc trouver un moyen de faire des tests physiques.
+$\Rightarrow$ Solutions possible: TurboNet, un émulateur performant. P4Campus, une méthode pour chercheurs visant à tester une implémentation à l'échelle du réseau d'un campus universitaire.
+
+L - L'opération du réseau par des humains se prête à l'erreur. Dans un futur distant on peut imaginer automatiser au complet le contrôle du réseau, avec un contrôle en boucle-fermée exploitant la télémétrie.
+
+\gras{Avis:} Un tour d'horizon exhaustif et très bien écrit de toutes les possibilités des équipements programmables. C'est un point de départ utile pour trouver un sujet de recherche. Seul point manquant: l'aspect matériel n'est presque pas abordé; j'aurais aimé voir un commentaire sur les plateformes existantes en production et en prototypage.
+
+\clearpage

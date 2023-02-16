@@ -1,0 +1,17 @@
+% Résumé de lecture
+
+\subsection{What you should know about P4 programming language P4 programmable switch, \cite{noauthor_what_2022}, Afterfusion, Janvier 2022}
+\gras{Pertinence:} 2 (article d'introduction au P4)
+\gras{Sujets:} langage P4
+
+\gras{Problématique:} Quel est l'intérêt du P4, et de quoi est fait un commutateur P4 physiquement?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Le P4 rend les commutateurs indépendants du protocole, permet aux ingénieurs réseau d'ajouter des applications maison dans leur équipement. Les commutateurs exécutent des fonctions du réseau normalement laissées aux OS des CPU: \emph{load-balancing}, sécurité, pare-feus, fonctions infonuagiques (je vois pas trop lesquelles), diagnostiques et télémétrie. Le Tofino possède pas mal le marché à lui tout seul.
+
+\gras{Résumé:} On peut ajouter des features au ASIC après installation et l'adapter à n'importe quel protocole. Il y a déjà des exemples d'applications commerciales réussies: Facebook a un \emph{load-balancer} TCP sur le Tofino; Stratum vend des commutateurs intelligents avec fonctionnalité nuagiques dessus: \emph{load-balancer}, \emph{flow control}, INT. La télémétrie est difficile voire impossible à mettre en place avec des équipements traditionnels, parce qu'une télémétrie implémentée en logicielle ne peut pas être aussi rapide que le traffic commuté. Les auteurs en profitent pour faire la promotion de leur commutateur intelligent, qui intègre un Tofino, un x86 Intel et des SoCs ARM maison appelés DPU pour accélérer les fonctionnalités réseau comme la télémétrie.
+
+\gras{Avis:} Un article commercial, mais qui a le mérite de montrer l'architecture d'un vrai matériel P4 fabriqué. Pour obtenir les features qu'ils voulaient, ils ont dû se rendre jusqu'à la fabrication d'un ASIC custom et payer la licence ARM dessus; ce qui montre bien que le Tofino est limité dans ce qu'il peut faire. Aussi, leur commutateur est un gros investissement monétaire... est-ce-que les fonctionnalité réseau supplémentaire justifient un tel prix.
+
+\clearpage

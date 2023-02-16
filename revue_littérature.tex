@@ -1,0 +1,142 @@
+\documentclass[11pt,letterpaper]{article}
+
+%\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
+\usepackage[cyr]{aeguill}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{textpos}
+\usepackage{graphicx}
+\usepackage[french]{babel}
+\usepackage{color}
+\usepackage{array}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{mathrsfs}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{siunitx}
+\usepackage{minted}
+\addto\captionsfrench{\def\tablename{Tableau}}
+
+\usepackage[none]{hyphenat}
+\usepackage[shortlabels]{enumitem}
+
+
+\newcommand{\infini}{\infty}
+\newcommand{\Ohms}{\Omega}
+\newcommand{\e}[1]{\times 10^{ {#1} }}
+\newcommand{\donc}{\Rightarrow}
+\newcommand{\fois}{\times}
+\newcommand{\environ}{\simeq}
+\newcommand{\gras}{\textbf}
+\newcommand{\italique}{\textit}
+
+%-----------------------------------------------------------------%
+% Definitions
+\newcommand{\session}{2023-2024}
+\newcommand{\firstauthor}{Yann \textbf{Roberge}}
+\newcommand{\firstregistrationnumber}{1802531}
+%\newcommand{\secondauthor}{Yann \textbf{Roberge}}
+%\newcommand{\secondregistrationnumber}{1802531}
+%\newcommand{\reportnumber}{}
+\newcommand{\firsttitle}{Revue de littérature}
+%\newcommand{\secondtitle}{   }
+%-----------------------------------------------------------------%
+
+
+\oddsidemargin 0pt
+\topmargin 0pt
+\textwidth 6.5in
+\textheight 8.1in
+
+\setlength{\parskip}{1em}
+
+\definecolor{bleu_poly}{RGB}{65,170,230}
+\definecolor{vert_poly}{RGB}{140,200,60}
+\definecolor{orange_poly}{RGB}{250,150,30}
+\definecolor{rouge_poly}{RGB}{185,30,50}
+\definecolor{gris_poly}{RGB}{166,168,171}
+
+
+\title{\vspace{-2.5cm} \noindent\makebox[\linewidth]{\color{rouge_poly}{\rule{\textwidth}{1.5pt}}}
+        \begin{center}
+          \begin{tabular}{m{6cm}}
+           \includegraphics[width=0.4\textwidth]{Polytechnique_signature-CMYK-droite_FR.eps}
+          \end{tabular}
+        \end{center}
+        \noindent\makebox[\linewidth]{\color{rouge_poly}{\rule{\textwidth}{1.5pt}}}
+        \\ \  \\
+        \Huge \firsttitle
+        \\ \ \\
+        }
+
+\author{\session \\ École Polytechnique de Montréal}
+
+\date{Dernière mise à jour: \today}
+
+\pagestyle{fancy}
+
+\lfoot{\session}
+\cfoot{Chaire KIN}
+\rfoot{\thepage/\pageref{LastPage}}
+\chead{}
+\lhead{\emph{Revue de littérature -- \firstauthor  \, (\firstregistrationnumber)}}
+\rhead{\includegraphics[width=2.5cm]{Polytechnique_signature-CMYK-droite_FR.eps}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength{\headheight}{45pt}
+
+
+\graphicspath{{figures/}}
+
+
+\newcommand{\vb}[1]{\mathbf{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+
+
+%-----------------------------------------------------------------%
+% SOF
+\begin{document}
+\maketitle
+\noindent\makebox[\linewidth]{\color{rouge_poly}{\rule{\textwidth}{1.5pt}}} 
+
+\noindent \LARGE \firstauthor  \hfill \firstregistrationnumber
+
+\noindent\makebox[\linewidth]{\color{rouge_poly}{\rule{\textwidth}{1.5pt}}}
+
+\newpage
+\normalsize
+
+
+\section{Sujets par mots-clefs}
+
+(Remplir plus tard quand il y aura ~75 références)
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Résumés de lecture}
+
+%%%% Résumés de lecture à la base écrits à la main, traduits et retapés ici
+
+\input{bosshart_p4_2014}
+\input{noauthor_oracle_2004}
+\input{parol_p4_2020}
+\input{noauthor_what_2022}
+\input{rijsman_getting_2019}
+\input{kfoury_exhaustive_2021}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Liste des références}
+
+\bibliographystyle{IEEEtran-francais}
+\bibliography{Ma_bibliotheque}
+
+\end{document}
+%-----------------------------------------------------------------%
+% EOF

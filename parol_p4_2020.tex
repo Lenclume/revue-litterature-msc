@@ -1,0 +1,21 @@
+% Résumé de lecture
+
+\subsection{P4 Network Programming Language—what is it all about?, \cite{parol_p4_2020}, Pawel, 2020}
+\gras{Pertinence:} 3 (article d'introduction au P4)
+\gras{Sujets:} langage P4
+
+\gras{Problématique:} Quels nouvelles fonctionnalités réseau le P4 débloque-t-il? Quel est le potentiel d'usages du langage?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Décharger des couches de la pile réseau normalement gérées en CPU vers le NIC ou les commutateurs/routeurs: couche IP, TCP, NAT, pare-feu, etc. Simuler des designs de commutateurs; implémentation de nouveaux commutateurs logiciels. L'usage le plus prometeur est la possibilité de collecte de données de télémétrie directement sur les équipements réseau (\emph{in-band network telemetry}).
+
+\gras{Résumé:} Le P4 a une structure de langage simple: il ressemble à du C allégé (ex. pas de pointeurs), auquel on a ajouté des mot-clefs natifs et des structures adaptées aux besoins des routeurs et commutateurs (entêtes, tables d'actions, déparseurs c-à-d sérialiseurs). Cela rend le p4 accessible aux ingénieurs réseaux n'ayant peu ou pas de d'expertise en semiconducteurs ou en logiciel. La facilité d'ajout de fonctionnalités leur donne la possibilité d'ajouter des fonctionnalités jusqu'alors hors d'atteinte, en particulier des mesures sur le réseau.
+
+Les programmes P4 définissent le \gras{plan de données}, séquence de blocs faite d'un parseur d'entêtes suivi tables d'actions, du déparseur et d'autres blocs définis en-dehors du langage (\emph{externs}). Un P4 ne définit \emph{pas}, par contre, de quelle manière les tables sont remplies. Cette fonction est laissée au logiciel de contrôle SDN externe nommé \emph{plan de contrôle}. P4Runtime est l'un d'eux.
+
+Le compilateur passe le programme vers une cible qui peut être n'importe quoi, d'un programme exécuté par un CPU, le commutateur simulé BMv2, du HDL pour un FPGA, ou des ASIC comme le Tofino. L'architecture P4 définit les contraintes de la cible, ce qui fait que les programmes P4 ne sont pas totalement portables.
+
+\gras{Avis:} Un premier aperçu prosaïque de ce qu'est le P4 et ses applications commerciales les plus évidentes.
+
+\clearpage

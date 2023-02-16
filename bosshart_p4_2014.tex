@@ -1,0 +1,39 @@
+% Résumé de lecture
+
+\subsection{P4: programming protocol-independent packet processors, \cite{bosshart_p4_2014}, Bosshart et al., 2014}
+\gras{Pertinence:} 3 (article fondateur)
+\gras{Sujets:} langage P4, SDN
+
+\gras{Problématique:} Comment étendre les fonctionnalités des SDN sans rajouter une complexité hors de contrôle à Openflow?
+
+\gras{Prérequis:} MPLS: \cite{noauthor_micronugget_nodate}, \cite{noauthor_multiprotocol_2023}; PortLand: \cite{noauthor_portland_2009}, \cite{noauthor_understanding_nodate}; VLANs, dot1Q: \cite{noauthor_vlan_2023}, \cite{noauthor_ieee_2022}; champ EtherType: \cite{noauthor_ethertype_2022}. Les trois sont utilisés à titre d'exemple. Openflow.
+
+
+\gras{Réponse:} Arrêter d'ajouter toujours plus d'entêtes possibles à la spécification d'Openflow. Implémenter à la place un 'Openflow 2.0' qui soit indépendant du protocole, permette la reconfiguration du plan de données, et soit indépendant de la cible.
+
+\gras{Résumé:} Les auteurs proposent le langage P4 comme Openflow 2.0. Le langage spécifié doit trouver un équilibre entre l'exhautivité de son support de protocoles et sa simplicité. Les développeurs P4 devraient pourvoir développer des modèles indépendant de la cible de la même manière que les développeurs C peuvent développer des programmes sans se soucier du jeu d'instructions`abstrait par le compilateur.
+
+2 - Modèle abstrait
+
+Les programmes suivront un modèle standard de commutateur formé d'une chaîne amorcée par un parseur (FSM), suivi d'une série de table \emph{match-action} et un désérialiseur (Le modèle qui allait devenir PISA.). Les auteurs font la distinction entre les opérations de \emph{configuration} et \emph{peuplement} (\emph{populating}, des tables), depuis renommées plan de données et plan de contrôle. Ils définissent les métadonnées comme information passée d'une table à une autre - port d'entrée, \emph{timestamp}, etc. L'AQM fonctionne commen sous Openflow: des tables d'actions distr5ibuent les paquets entre les ports de sortie; ils prévoient que l'on puisse ajouter d'autres fonctions de contrôle de congestion au langage.
+
+3 - A programming language
+
+Le P4 doit pouvoir définir le format de chaque entête. Des alternatives au P4 serient Click, et Openflow 1.0 lui-même. Le premier décrit le traitement de paquets avec une syntaxe C++ et vise l'implémentation de commatateurs logiciels. Il est difficile à synthétiser en matériel parce qu'il n'exprime pas le traitement sous forme de pipeline de flux de contrôle. Openflow 1.0 ne permet pas de définir librement des en-têtes.
+
+4 - P4 by example
+
+Ils utilisent l'exemple des étiquettes MPLS pour définir les structures et mot-clefs de base qui sont toujours dans le $P4_{16}$ aujourd'hui:
+\begin{description}
+	\item[Headers] champs d'entêtes, définition de leurs valeurs admissibles
+	\item[Parsers] Machine d'identification d'entêtes (et de vérification)
+	\item[Tables] Traitements à appliquer en fonction des entêtes \& actions
+	\item[Controls] Blocs de contrôle de flux, menant d'une table à une autre.
+\end{description}
+
+Les tables interagissent avec le plan de contrôle SDN. Elles sont synthétisées sur les ressources de la cible: RAM pour les correspondances exactes (\emph{exact-match}), TCAM pour les correspondances ternaires (et pour les LPM je suppose?). La compilation est 'facile' pour des cibles logicielles, moins pour les ASICs. Le compilateur \emph{back-end} traduit la représentation parsée vers la cible matérielle.
+
+\gras{Avis:} Le papier pose les bases du langage P4 et de la métaarchitecture PISA tels qu'on les connait aujourd'hui. À la base, l'objectif du langage était simplement de dépasser le manque de flexibilité intrinsèque des SDN; alors qu'aujourd'hui on met plus en avant les applications supplémentaires (INT, in-network computing, etc.) possibles sur les commutateurs P4. La syntaxe a beaucoup changé depuis 2014, surtout la FSM du parseur et les tables; mais toutes les idées de base se retrouvent déjà dans ce papier.
+La possibilité de synthèse sur FPGA n'est pas même évoquée dans ce papier. Il faut croire que les choses ont changées depuis puisque je me souviens qu'à la keynote P4 de Mai 2022 M. McKeown affirmait que les commutateurs sont aujourd'hui plus rapides sur matériel reconfigurable que sur ASIC, parce que l'implémentation FPGA n'est pas obligée de s'encombrer de tout un tas de fonctionnalités niches dont la plupart ne seront jamais utilisées.
+
+\clearpage

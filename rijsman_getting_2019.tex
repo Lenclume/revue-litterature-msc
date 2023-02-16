@@ -1,0 +1,31 @@
+% Résumé de lecture
+
+\subsection{Getting started with P4, \cite{rijsman_getting_2019}, Rijsman, 2019}
+\gras{Pertinence:} 3 (tutoriel pour monter une VM P4 et envoyer quelques paquets tests)
+\gras{Sujets:} langage P4, environnements de développement
+
+\gras{Problématique:} Quelles sont les étapes pour configurer un environnement P4 simple, monter un commutateur P4 basique, et le faire fonctionner sur le BMv2?
+
+\gras{Prérequis:} Maîtrise de VirtualBox/VMWare/autre \cite{noauthor_oracle_2004} (l'auteur fait tout dans une boîte AWS, mais c'est quand même plus pratique avec une VM); protobuf; interfaces virtuelles Linux
+
+\gras{Réponse:} Liste des étapes ci-dessous:
+
+\gras{Résumé:}
+
+\begin{itemize}
+	\item Monter une VM Ubuntu 20.04.
+	\item Ouvrir le SSH dessus (la manière la plus simple de le faire est de régler une IP statique sur la VM avec \texttt{netplan}, configurer le réseau de la VM en \emph{bridge}).
+	\item Installer le million de dépendances \texttt{apt} - sauf \texttt{texlive-full}, je ne vois pas pourquoi ils suggèrent ce paquet plus lourd à lui seul que tout les autres, ça fonctionne très bien sans.
+	\item Compiler et installer protobuf
+	\item Compiler et installer BMv2
+	\item Taper le code P4 basé sur \texttt{<core.p4>} et \texttt{<v1model.p4>}.
+	\item Compiler avec \texttt{p4c} vers le BMv2. Ils sort un \texttt{.json} lisible par le simulateur comportemental.
+	\item Ajouter une paire d'interface virtuelles \texttt{veth} à la boîte Linux.
+	\item Lancer le commutateur \texttt{simple\_switch}, lui passer les interface virtuelles en option
+	\item Lancer le plan de contrôle \texttt{simple\_switch\_CLI}, remplir la table de routage IP.
+	\item Lancer des renifleurs de paquets sur les interfaces virtuelles, par exemple \texttt{tcpdump}.
+	\item Envoyer des paquets test avec \texttt{scapy}. Selon l'IP de destination choisie ils apparaissent dans les fenêtres \texttt{tcpdump} en sortie.
+\end{itemize}
+
+\gras{Avis:} Le seul tutoriel de référence trouvable qui explique comment monter l'environnement de A à Z, sans utiliser la VM préfabriquée du répo officiel. Il marche du premier coup. Par contre il n'explique pas \emph{pourquoi} on a besoin de telle ou telle dépendance. Ça reste à explorer. Les outils sont déjà matures et fonctionne déjà bien. Reste à voir comment ça se passe quand on veut compiler vers des cibles matérielles.
+\clearpage

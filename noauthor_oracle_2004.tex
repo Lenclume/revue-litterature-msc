@@ -1,0 +1,27 @@
+% Résumé de lecture
+
+\subsection{Oracle VirtualBox User Manual, \cite{noauthor_oracle_2004}, Oracle, 2004-2023}
+\gras{Pertinence:} 3 ; tous les environnements P4 et réseau en général passent par des VMs, donc autant savoir ce qu’on fait.
+\gras{Sujets:} environnements de développements
+
+\gras{Problématique:} Comprendre les réglages et les configurations réseaux possibles avec les VMs, dans le but d'arriver à monter facilement de nouveaux environnements.
+
+\gras{Prérequis:} Aucun
+
+
+\gras{Réponse:} Arrêter d'ajouter toujours plus d'entêtes possibles à la spécification d'Openflow. Implémenter à la place un 'Openflow 2.0' qui soit indépendant du protocole, permette la reconfiguration du plan de données, et soit indépendant de la cible.
+
+\gras{Résumé:}
+
+\begin{itemize}
+	\item Section 4 : Configuring VMs. Ils passent à travers tous les réglages possibles du matériel. En particulier les réglages possibles des interfaces débogage sérielles. La plupart sont difficiles à utiliser parce que VBox n’a pas accès aux fichiers \texttt{/dev/ttyS*} de l’hôte.
+	\item Section 7 : Virtual networking. Ils passent à travers tous les réglages des cartes réseau virtuelles : NAT, bridge, host NAT, internal network, d’autres accessibles hors du GUI.
+\end{itemize}
+
+On peut controller VBox entièrement par CLI avec VBoxManage. Certains fonctionnalités avancées ne sont accessibles que par ligne de commande, pas par le GUI.
+
+Troubleshooting : s’ajouter soi-même au groupe UNIX \texttt{vboxusers}.
+
+\gras{Avis:} En règle générale la configuration de VM se comprend très bien par analogie avec le montage de PC physique (insérer des cartes dans la carte mère), et les configuration réseau se comprennent comme des montages réseau avec des switchs et des routeurs physiques.
+
+\clearpage
