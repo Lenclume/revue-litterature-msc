@@ -1,0 +1,22 @@
+% Résumé de lecture
+
+\subsection{What you should know about P4 programming language P4 programmable switch, \cite{noauthor_reconfigurable_2022}, Wikipédia}
+\gras{Pertinence:} 1 (source d'information générale qui n'a que but pour moi que de savoir que les FPGAs reconfigurables existent aujourd'hui commercialement.)
+\gras{Sujets:} FPGA reconfigurable
+
+\gras{Problématique:} Qu'est-ce-que le matériel reconfigurable, comment est-il implémenté sur le matériel, dans les grandes lignes?
+
+\gras{Prérequis:} goulot d'étranglement de Von Neumann \cite{noauthor_von_nodate}: ralentissement de plus en plus problématique du bus entre le CPU et la mémoire principale.
+
+\gras{Réponse:} Voir Résumé
+
+\gras{Résumé:} Résumé: le moyen principal d’ajouter de la reconfigurabilité est d’avoir une architecture partiellement reconfigurable. Xilinx et Intel ont tous les deux certains modèles conçus pour être reconfigurables. Deux types de FPGAs partiellement reconfigurables:
+Statique: on a pas besoin de réécrire tout le bitstream pour la reconfiguration, mais tout le FPGA doit être reset pendant le processus
+Dynamique: plus intéressant, toute la partie non-reconfigurée du FPGA continue à fonctionner pendant qu’on reconfigure le reste.
+La reconfigurabilité est permise par le design hiérarchique et modulaire: typiquement, on reconfigure une entité séparément du reste. Par exemple, un périphérique ou un coprocesseur connecté au CPU.
+
+\gras{Avis:} Pas super, l’écriture part un peu dans tout les sens, passe trop de temps sur les différences entre FPGAs à granularité fine ou grossière. Pas de ligne directrice claire.
+
+En 2008, quand Reconfigurable Computing \cite{hauck_introduction_2008} est sorti, il n'existait pas de puces commercialement disponible fait pour la reconfigurabilité (d'après ce même livre), parce que la taille du marché était alors trop petite. Je constate qu'il y en a maintenant quelques unes.
+
+\clearpage

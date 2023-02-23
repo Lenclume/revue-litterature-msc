@@ -1,0 +1,78 @@
+% Résumé de lecture
+
+\subsection{Chapitre 1: Device Architecture, Reconfigurable Computing: The Theory and Practice of FPGA-Based Computation, \cite{chang_device_2008}, Chang, 2008}
+\gras{Pertinence:} 3 (article de prérequis)
+\gras{Sujets:} Architecture des FPGA
+
+\gras{Problématique:} Qu'y a-t-il sous le capot d'un FPGA commercial classique?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} (section 1.6: Sommaire) Les auteurs décrivent l'architecture d'un FPGA commerciale avec une approche \emph{bottom-up}: on décrit d'abord l'architecture des tuiles de base: LUT et DFF, regroupés en \emph{slices}. Ils décrivent ensuite l'interconnection des \emph{slices} en plus-proche-voisin à petit échelle qui les regroupe en CLB; puis, un niveau plus haut, comment les CLB sont interconnectés par le réseau de matrices d'interconnexions à plusieurs niveaux, dont les plus longs peuvent traverser plusieurs CLB de longueurs sont trop accumuler de délai de propagation. Des blocs spécialisés ajoutés au FPGA implémentent les opérations pour lesquelles les CLBs LUT/DFF sont inefficaces: RAM, DSP, PS. À chaque point d'interconnexion et chaque entrée de la table de vérité des LUT correspond un bit de configuration, stocké dans une mémoire SRAM, flash ou antifusible. Les modèles Xilinx Stratix et Altera Virtex illustrent comment ces structures sont utilisées en pratique.
+
+\gras{Résumé:}
+
+\begin{enumerate}
+	\item{Logic - The computational fabric}
+	\item{Arrays and interconnects}
+	\item{Extending logic}
+	\item{Configuration}
+	\item{Case studies}
+	\item{Summary}
+\end{enumerate}
+
+\gras{Logic - The computational fabric}
+
+Blocs de base: les $n$-LUTs s'implémentent avec un mux à $n$ bits de sélection. Les $2^n$ bits d'entrée sont câblés à partir du bitstream à la configuration. Leurs choix déterminent la table de vérité de la fonction combinatoire implémentée.
+
+Les plus grandes tables permettent des fonctions combinatoires complexes avec moins de délais de propagation que si elles étaient réparties entre plusieurs LUT, mais gaspillent des ressources si on implémentent des fonctions simples, ex. un inverseur 1-bit sur une LUT-6. Empiriquement, la LUT-4 est le meilleur compromis pour la plupart des applications.
+
+En règle générale, les programmes de manipulation bit-à-bit bénéficient de LUT de granularité fine, tandis que les applications opérant sur des mots ex. DSP ou flux bénéficient de blocs grossiers. La solution standard est d'utiliser des LUT-4 épaulés par des blocs spécialisés en dur.
+
+On rajoute un DFF optionnel à la sortie de chaque LUT pour pouvoir pipeliner ou implémenter de la logique séquentielle. Les \emph{CLBs} ont typiquement plus d'une LUT-4 pour optimiser le délai et la surface. Chaque entrée de chaque LUT, la valeur initiale de chaque DFF, et le mux pour sauter ou non le DFF, prennent chacun un bit dans la mémoire de configuration.
+
+\gras{The array and interconnect}
+
+Le interconnexions entre les \emph{slices} doivent pouvoir relier à peu près n'importe quelle tranche avec une autre, se croiser sans se perturber, et traverser de longues distances sans trop accumuler de délai.
+
+Types d'interconnexions:
+
+\begin{enumerate}
+	\item{voisins-adjacents (\emph{nearest neighbor})}
+	\item{segmentées}
+	\item{hiérarchiques}
+\end{enumerate}
+
+Les FPGA commerciaux utilisent chacun leur variante d'interconnexions hiérarchiques: les tranches se rassemblent en petits groupes (\og îles \fg ou CLBs connectés uniquement à leurs voisins les plus proches; un mode d'interconnexion simple et direct, mais qui force tout signal propagé sur plus d'une case de longueur à traverser une tranche ou plus entre celle de départ et celle d'arrivée. Les tranches `transpercées' sont gaspillées, avec au passage un gros délai d'interconnexion.
+
+Plusieurs îles se relient entre elles par connexions \emph{segmentées}; elles `nagent' au milieu des blocs d'interconnexions. Blocs rajoutés dans une interconnexion segmentées: \emph{Connection blocks} (CBs), qui relient ou pas les CLBs au bus d'interconnexion le plus proches (configurables), et \emph{Switch-Blocks} (SBs), crossbars placées aux croisement des bus horizontaux et verticaux, également configurables. Si on a besoin de fils plus longs que une case de CLB, les \emph{switch-blocks} peuvent commuter les fils sur des lignes sautant plusieurs (2, 4, 8...) cases sans passer par les commutateurs - et donc éviter les délais combinatoires associés. En règle générale, plus on monte dans la hiérarchie des groupes de logique de plus en plus gros, plus les SB offrent de long fils. Grâce à cette architecture, le délai de routage de A à B en fonction de la distance parcourue est $O(\log(n))$ et pas $O(n)$ comme on aurait pu s'y attendre. $\environ 90\%$ de la surface d'un FPGA est consacrée aux interconnexions!
+
+\gras{Extending logic}
+
+En plus des CLBs normaux, des tuiles supplémentaires accélèrent les opérations auxquelles la combinaison classique LUT-DFF est inadaptée, mais qui sont tout de mêmes courantes dans les applications: chaînes de retenues rapides pour les additionneurs, multiplieurs,, BRAMs, processeurs en dur. Au fur et à mesure que l'industrie applique les FPGAs à des domaines d'applications de plus en plus larges, on peut s'attendre à voir émerger un éventail de tuiles spécialisées de plus de en plus variées aussi.
+
+\gras{Configuration}
+
+Chaque point de configuration du FPGA correspond à un bit de mémoire. Le bitstream est stocké sur SRAM, Flash ou ROM antifusible.
+
+Comparatif:
+
+\begin{itemize}
+	\item SRAM: rapide à écrire, pas d'usure, mais volatile (on doit rajouter une EEPROM externe), et consomme du courant statique
+	\item Flash: Non-volatile, mais longue à écrire et sujette à l'usure.
+	\item Antifusible: Invulnérable aux radiation (standard pour le spatial/militaire), mais OTP donc impossible à utiliser pour le prototypage ou les usages à FPGA dynamiquement reconfigurables.
+\end{itemize}
+
+Mémoires antifusibles: chaque bit a un lien ouvert par défaut, que se \og soude \fg quand on le programme.
+
+\gras{Case studies}
+
+L'Altera Stratix et le Xilinx Virtex (à jour à l'époque) utilisent les structures décrites dans les sections précédentes; avec chacun la nomenclature du fabricant: les éléments de bases sont essentiellement des LUT-4 avec un DFF - LE (\emph{Logic Element}) pour Altera, et tranche (\emph{slice}) pour Xilinx, nommées $X0Y0$, $X0Y1$, etc. en fonction de leur position dans l'île. Les regroupement (îles) d'éléments de base se ressemblent - LAB (Altera), CLB (Xilinx). Les deux ont plusieurs tailles de BRAM, des DSP, des chaînes de retenues rapides, et des processeurs en dur; le tout relié par des interconnexions hiérarchiques.
+
+Les deux études de cas illustrent bien la pertinence et la - surprenante - précision des descriptions du matérielles faites dans ce chapitre.
+
+\gras{Summary} (Avis ci-dessous)
+
+\gras{Avis:} Un chapitre brillament écrit; par lequel un utilisateur passe d'un modèle mental du FPGA comme boîte noire \og soupe de portes logiques \fg cablées ensemble, à un modèle réaliste d'éléments logiques fixes, configurés par la mémoire du bitstream et routés à travers le réseau d'interconnexions hiérarchiques. Fort de cette conception, un designer peut baser ses designes HLS/RTL sur une compréhension solide du matériel et l'ajuster en fonction. Les auteurs le comparent avec justesse à un automobiliste qui ajuste sa conduite en fonction de sa compréhension de la mécanique du véhicule. Je verrais bien ce chapitre enseigné dans les dernières semaines d'un des cours d'introduction aux FPGA de 3\ieme année de bac élec.
+
+\clearpage
