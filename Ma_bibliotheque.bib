@@ -169,8 +169,10 @@
 	author = {Luinaud, Thomas and Santiago da Silva, Jeferson and Langlois, J.M. Pierre and Savaria, Yvon},
 	month = feb,
 	year = {2021},
-	keywords = {graph optimization, p4 language, packet deparsers},
+	keywords = {graph optimization, p4 language, packet deparsers, L1},
 	pages = {280--286},
+	annote = {Sujet: Comment optimiser l’étage d’egress sur FPGA, le talon d’Achilles des outils de synthèse existants: SDNet, P4FPGA, Compilateur Xilinx.
+},
 	file = {Version acceptée:C\:\\Users\\Yann\\Zotero\\storage\\ULR6WKYK\\Luinaud et al. - 2021 - Design Principles for Packet Deparsers on FPGAs.pdf:application/pdf},
 }
 
@@ -555,9 +557,6 @@ The term static differentiates SRAM from DRAM (dynamic random-access memory) —
 	pages = {1--9},
 }
 
-@book{noauthor_notitle_nodate,
-}
-
 @book{ridley_literature_2012,
 	title = {The {Literature} {Review}: {A} {Step}-by-{Step} {Guide} for {Students}},
 	isbn = {978-1-4462-6804-9},
@@ -594,7 +593,7 @@ The term static differentiates SRAM from DRAM (dynamic random-access memory) —
 	url = {https://linkinghub.elsevier.com/retrieve/pii/B9780123705228500054},
 	language = {en},
 	urldate = {2023-02-10},
-	booktitle = {Reconfigurable {Computing}},
+	booktitle = {Reconfigurable {Computing}: {The} {Theory} and {Practice} of {FPGA}-{Based} {Computation}},
 	publisher = {Elsevier},
 	author = {Chang, Mark L.},
 	year = {2008},
@@ -657,4 +656,156 @@ La reconfigurabilité est permise par le design hiérarchique et modulaire: typi
 Avis: pas super, l’écriture part un peu dans tout les sens, passe trop de temps sur les différences entre FPGAs à granularité fine ou grossière. Pas de ligne directrice claire.
 },
 	file = {Snapshot:C\:\\Users\\Yann\\Zotero\\storage\\9NEGQ7VW\\Reconfigurable_computing.html:text/html},
+}
+
+@misc{noauthor_translation_2023,
+	title = {Translation lookaside buffer},
+	copyright = {Creative Commons Attribution-ShareAlike License},
+	url = {https://en.wikipedia.org/w/index.php?title=Translation_lookaside_buffer&oldid=1135682679},
+	abstract = {A translation lookaside buffer (TLB) is a memory cache that stores the recent translations of virtual memory to physical memory. It is used to reduce the time taken to access a user memory location. It can be called an address-translation cache.  It is a part of the chip's memory-management unit (MMU). A TLB may reside between the CPU and the CPU cache, between CPU cache and the main memory or between the different levels of the multi-level cache. The majority of desktop, laptop, and server processors include one or more TLBs in the memory-management hardware, and it is nearly always present in any processor that utilizes paged or segmented virtual memory.
+The TLB is sometimes implemented as content-addressable memory (CAM). The CAM search key is the virtual address, and the search result is a physical address. If the requested address is present in the TLB, the CAM search yields a match quickly and the retrieved physical address can be used to access memory. This is called a TLB hit. If the requested address is not in the TLB, it is a miss, and the translation proceeds by looking up the page table in a process called a page walk. The page walk is time-consuming when compared to the processor speed, as it involves reading the contents of multiple memory locations and using them to compute the physical address. After the physical address is determined by the page walk, the virtual address to physical address mapping is entered into the TLB.  The PowerPC 604, for example, has a two-way set-associative TLB for data loads and stores. Some processors have different instruction and data address TLBs.},
+	language = {en},
+	urldate = {2023-02-17},
+	journal = {Wikipedia},
+	month = jan,
+	year = {2023},
+	note = {Page Version ID: 1135682679},
+	keywords = {Lu partiellement},
+	file = {Snapshot:C\:\\Users\\Yann\\Zotero\\storage\\HWVGF6AF\\Translation_lookaside_buffer.html:text/html},
+}
+
+@misc{noauthor_page_2022,
+	title = {Page table},
+	copyright = {Creative Commons Attribution-ShareAlike License},
+	url = {https://en.wikipedia.org/w/index.php?title=Page_table&oldid=1083393269},
+	abstract = {A page table is the data structure used by a virtual memory system in a computer operating system to store the mapping between virtual addresses and physical addresses.  Virtual addresses are used by the program executed by the accessing process, while physical addresses are used by the hardware, or more specifically, by the random-access memory (RAM) subsystem. The page table is a key component of virtual address translation that is necessary to access data in memory.},
+	language = {en},
+	urldate = {2023-02-17},
+	journal = {Wikipedia},
+	month = apr,
+	year = {2022},
+	note = {Page Version ID: 1083393269},
+	keywords = {Lu partiellement},
+	file = {Snapshot:C\:\\Users\\Yann\\Zotero\\storage\\4TFV8QCF\\Page_table.html:text/html},
+}
+
+@inproceedings{feng_-situ_2021,
+	address = {New York, NY, USA},
+	series = {{HotNets} '21},
+	title = {In-situ {Programmable} {Switching} using {rP4}: {Towards} {Runtime} {Data} {Plane} {Programmability}},
+	isbn = {978-1-4503-9087-3},
+	shorttitle = {In-situ {Programmable} {Switching} using {rP4}},
+	url = {https://doi.org/10.1145/3484266.3487367},
+	doi = {10.1145/3484266.3487367},
+	abstract = {The existing chip architecture and programming language are incapable of supporting in-service updates by loading or offloading on-demand protocols and functions at runtime. We examine the fundamental reasons for the inflexibility and design a new In-situ Programmable Switch Architecture (IPSA) as a fix. We further design rP4, a P4 extension, for programming IPSA-based devices. To manifest the in-situ programming feasibility, we develop an rP4 compiler and demonstrate several use cases on both a software switch, ipbm, and an FPGA-based prototype. Our preliminary experiments and analysis show that, compared to PISA, IPSA provides higher flexibility in enabling runtime functional update with limited performance and gate-count penalty. The in-situ programming capability enabled by IPSA and rP4 opens a promising design space for programmable networks.},
+	urldate = {2023-02-20},
+	booktitle = {Proceedings of the {Twentieth} {ACM} {Workshop} on {Hot} {Topics} in {Networks}},
+	publisher = {Association for Computing Machinery},
+	author = {Feng, Yong and Song, Haoyu and Li, Jiahao and Chen, Zhikang and Xu, Wenquan and Liu, Bin},
+	month = nov,
+	year = {2021},
+	keywords = {L1},
+	pages = {69--76},
+	file = {Full Text PDF:C\:\\Users\\Yann\\Zotero\\storage\\3M4998FH\\Feng et al. - 2021 - In-situ Programmable Switching using rP4 Towards .pdf:application/pdf},
+}
+
+@inproceedings{benacek_p4--vhdl_2016,
+	title = {P4-to-{VHDL}: {Automatic} {Generation} of 100 {Gbps} {Packet} {Parsers}},
+	shorttitle = {P4-to-{VHDL}},
+	doi = {10.1109/FCCM.2016.46},
+	abstract = {Software Defined Networking and OpenFlow offer an elegant way to decouple network control plane from data plane. This decoupling has led to great innovation in the control plane, yet the data plane changes come at much slower pace, mainly due to the hard-wired implementation of network switches. The P4 language aims to overcome this obstacle by providing a description of a customized packet processing functionality for configurable switches. That enables a new generation of possibly heterogeneous networking hardware that can be runtime tailored for the needs of particular applications from various domains. In this paper we contribute to the idea of P4 by presenting design, analysis and experimental results of our packet parser generator. The generator converts a parse graph description of P4 to a synthetizable VHDL code suitable for FPGA implementation. Our results show that the generated circuit is able to parse 100 Gbps traffic with fairly complex protocol structure at line rate on a Xilinx Virtex-7 FPGA. The approach can be used not only in switches, but also in other appliances, such as application accelerators and smart NICs. We compare the generated output to a hand-written parser to show that the price for configurability is only a slightly larger and slower circuit.},
+	booktitle = {2016 {IEEE} 24th {Annual} {International} {Symposium} on {Field}-{Programmable} {Custom} {Computing} {Machines} ({FCCM})},
+	author = {Benácek, Pavel and Pu, Viktor and Kubátová, Hana},
+	month = may,
+	year = {2016},
+	keywords = {Computer architecture, Field programmable gate arrays, Pipelines, Protocols, Program processors, Data mining, Generators},
+	pages = {148--155},
+	annote = {Avis: génération VHDL, puis synthèse sous Vivado.
+Le papier ne dit pas si les ‘tests’ mentionnés ont été faits en simulation ou avec des vrais paquets.
+},
+	file = {IEEE Xplore Abstract Record:C\:\\Users\\Yann\\Zotero\\storage\\NGASQLCB\\7544769.html:text/html;IEEE Xplore Full Text PDF:C\:\\Users\\Yann\\Zotero\\storage\\4SHYU5S9\\Benácek et al. - 2016 - P4-to-VHDL Automatic Generation of 100 Gbps Packe.pdf:application/pdf},
+}
+
+@misc{noauthor_intel_nodate,
+	title = {Intel {Learning}},
+	url = {https://learning.intel.com/developer/learn/course/external/view/elearning/378/partial-reconfiguration-for-intel-fpga-devices-pr-host-ip-implementations},
+	urldate = {2023-02-21},
+}
+
+@article{kastovsky_building_nodate,
+	title = {Building a {PoC} of {Segment} {Routing} at {100G} {Using} {FPGA} {Smart} {NIC} and {P4} {Language}},
+	language = {en},
+	author = {Kaštovský, Petr},
+	file = {Kaštovský - Building a PoC of Segment Routing at 100G Using FP.pdf:C\:\\Users\\Yann\\Zotero\\storage\\QH6P9HH7\\Kaštovský - Building a PoC of Segment Routing at 100G Using FP.pdf:application/pdf},
+}
+
+@inproceedings{yazdinejad_p4_2018,
+	title = {P4 to {SDNet}: {Automatic} {Generation} of an {Efficient} {Protocol}-{Independent} {Packet} {Parser} on {Reconfigurable} {Hardware}},
+	shorttitle = {P4 to {SDNet}},
+	doi = {10.1109/ICCKE.2018.8566590},
+	abstract = {Nowadays network managers look for ways to change the design and management of networks that can make decisions on the control plane. Future switches should be able to support the new features and flexibility required for parsing and processing packets. One of the critical components of switches is the packet parser that processes the headers of the packets to be able to decide on the incoming packets. Here the data plane, and particularly packet parser in OpenFlow switches, which should have the flexibility and programmability to support the new requirements and OpenFlow multiple versions, are focused. Designed here is an architecture that unlike the static network equipments, it has the flexibility and programmability in the data plane network, especially the SDN network, and supports the parsing and processing of specific packets. To describe this architecture, a high-level P4 language is used to implement it on a reconfigurable hardware (i.e., FPGA). After automatic generating the protocol-independent Packet parser architecture on the Virtex-7, it is compiled to firmware by Xilinx SDNet, and ultimately an FPGA Platform is implemented. It has fewer consumption resources and it is more efficient in terms of throughput and processing speed in comparison with other architectures.},
+	booktitle = {2018 8th {International} {Conference} on {Computer} and {Knowledge} {Engineering} ({ICCKE})},
+	author = {Yazdinejad, Abbas and Bohlooli, Ali and Jamshidi, Kamal},
+	month = oct,
+	year = {2018},
+	note = {ISSN: 2375-1304},
+	keywords = {Computer architecture, Field programmable gate arrays, Pipelines, Protocols, Hardware, P4, Program processors, Data Plane, Delays, OpenFlow Switch, Packet Parser, Reconfigurable Hardware, SDNet},
+	pages = {159--164},
+	file = {IEEE Xplore Abstract Record:C\:\\Users\\Yann\\Zotero\\storage\\3T8BHV47\\8566590.html:text/html;IEEE Xplore Full Text PDF:C\:\\Users\\Yann\\Zotero\\storage\\MDX65UFM\\Yazdinejad et al. - 2018 - P4 to SDNet Automatic Generation of an Efficient .pdf:application/pdf},
+}
+
+@article{amd_xilinx_inc_vitis_2022,
+	title = {Vitis {Networking} {P4} {User} {Guide}},
+	language = {en},
+	urldate = {2023-02-21},
+	author = {{AMD Xilinx Inc.}},
+	year = {2022},
+	file = {2022 - Vitis Networking P4 User Guide.pdf:C\:\\Users\\Yann\\Zotero\\storage\\UF8EUF9Y\\2022 - Vitis Networking P4 User Guide.pdf:application/pdf},
+}
+
+@misc{noauthor_intelligent_nodate,
+	title = {Intelligent fabric processors - {Tofino} - {Switch} to intelligence},
+	url = {https://www.intel.com/content/www/ca/en/products/network-io/programmable-ethernet-switch/tofino-3-product-brochure.html},
+	abstract = {Upgrade from fixed-function Ethernet switches to Intel Tofino P4 programmable intelligent fabric processors.},
+	language = {en},
+	urldate = {2023-02-22},
+	journal = {Intel},
+	file = {Intelligent fabric processors - Tofino - Switch to.pdf:C\:\\Users\\Yann\\Zotero\\storage\\LQXMBPHI\\Intelligent fabric processors - Tofino - Switch to.pdf:application/pdf;Snapshot:C\:\\Users\\Yann\\Zotero\\storage\\X7M6V2L5\\tofino-3-product-brochure.html:text/html},
+}
+
+@inproceedings{xing_vision_2021,
+	address = {New York, NY, USA},
+	series = {{HotNets} '21},
+	title = {A {Vision} for {Runtime} {Programmable} {Networks}},
+	isbn = {978-1-4503-9087-3},
+	url = {https://doi.org/10.1145/3484266.3487377},
+	doi = {10.1145/3484266.3487377},
+	abstract = {Our community has made significant progress in developing programmable network infrastructure, starting from the control plane and expanding to the data plane. As a latest trend, network devices are becoming runtime programmable while serving live traffic. This allows for reprogramming of individual device programs at fine-grained timescales to add or remove network functions. Many applications and services, however, need control over a combination of devices, including end host stacks, NICs, and switches, to accomplish their goals. We lay out our vision for runtime programmable networks, building upon device-level features to provide live, network-wide, runtime reprogramming. A whole-stack approach is needed with new programming models, compiler support, and network management abstractions. We outline a research agenda as a call to arms to the community.},
+	urldate = {2023-02-24},
+	booktitle = {Proceedings of the {Twentieth} {ACM} {Workshop} on {Hot} {Topics} in {Networks}},
+	publisher = {Association for Computing Machinery},
+	author = {Xing, Jiarong and Qiu, Yiming and Hsu, Kuo-Feng and Liu, Hongyi and Kadosh, Matty and Lo, Alan and Akella, Aditya and Anderson, Thomas and Krishnamurthy, Arvind and Ng, T. S. Eugene and Chen, Ang},
+	month = nov,
+	year = {2021},
+	keywords = {Programmable networks},
+	pages = {91--98},
+	file = {Full Text PDF:C\:\\Users\\Yann\\Zotero\\storage\\BPZ4K4DV\\Xing et al. - 2021 - A Vision for Runtime Programmable Networks.pdf:application/pdf},
+}
+
+@misc{amd_xilinx_inc_introduction_2022,
+	title = {Introduction • {Getting} {Started} with {Alveo} {Data} {Center} {Accelerator} {Cards} {User} {Guide} ({UG1301}) • {Reader} • {Documentation} {Portal}},
+	url = {https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards/Introduction},
+	urldate = {2023-02-24},
+	author = {{AMD Xilinx Inc.}},
+	month = dec,
+	year = {2022},
+	keywords = {Lu},
+	file = {2022 - Getting Started with Alveo Data Center Accelerator.pdf:C\:\\Users\\Yann\\Zotero\\storage\\WAKNJ4KT\\2022 - Getting Started with Alveo Data Center Accelerator.pdf:application/pdf;Introduction • Getting Started with Alveo Data Center Accelerator Cards User Guide (UG1301) • Reader • Documentation Portal:C\:\\Users\\Yann\\Zotero\\storage\\CLADNTFX\\Introduction.html:text/html},
+}
+
+@article{noauthor_getting_2022,
+	title = {Getting {Started} with {Alveo} {Data} {Center} {Accelerator} {Cards}},
+	language = {en},
+	year = {2022},
+	keywords = {Lu},
 }
