@@ -1,0 +1,120 @@
+% Résumé de lecture
+
+\subsection{Content-Addressable Memory (CAM) Circuits and Architectures: A Tutorial and Survey, \cite{pagiamtzis_content-addressable_2006}, Pagiamtzis K. and Sheikholeslami A., 2006}
+\gras{Pertinence:} 3 (article de prérequis sur les mémoires CAM: les sections I et II donnent un background essentiel sur ce que sont les mémoires associatives, leurs architectures, et leurs circuits. Les sections III, IV et V, par contre, sont une revue de littérature passée-date sur les amélioration sur le CAM, plus niche et moins essentielles, pas nécéssaire de rentrer totalement dans les détails.)
+
+\gras{Sujets:} Mémoires CAM
+
+\gras{Problématique:} Comment implémenter une mémoire CAM en dur, au niveau système puis au niveau circuit? Comment réduire leur consommation de puissance?
+
+\gras{Prérequis:} Fonctionnement du circuit d'une cellule SRAM \cite{noauthor_static_2023}
+
+\gras{Réponse:} Au niveau système, une CAM prend en entrée une donnée et retourne l'adresse la contenant. Au niveau circuit, on l'implémente en CMOS avec une \emph{matchline} en logique NOR ou NAND, avec leurs variantes 9-T ou 10-T. La \emph{matchline} utilise un système de précharge, évaluation du résultat, puis amplification pour lecture du résultat. Les sections III, IV, et V, font l'inventaire des méthodes permettant d'économiser l'énergie en déviant des implémentations traditionnelles, au niveau de la \emph{matchline}, de la \emph{search line}, puis de l'architecture globale.
+
+\gras{Résumé:}
+
+I - Introduction: Les auteurs donnent un résumé du fonctionnement d'une CAM au niveau architectural. En règle générale la capacité des mémoires CAM suit la loi de Moore avec un retard de $\fois 2$ sur les SRAMs classiques; explicable par l'utilisation de 2 cellules SRAM pour chaque cellule de TCAM. 
+
+A - Architecture générale d'une CAM: mot recherché en entrée, \emph{word-match} lines en sortie. Ces lignes de résultat de recherches passent un encodeur qui retourne l'adresse à laquelle on a trouvé le mot (encodeur de priorité dans le cas d'une TCAM, il faut stocker les préfixes les plus long dans les adresses basses.) (comment insère-t-on des ligne au milieu de la table alors? Il faut tout décaller?) Pour ensuite router le paquet vers le bon port de sortie, on enchaîne la CAM avec une RAM contenant la liste des ports de sortie. L'adresse sortie par la recherche en CAM rentre dans la RAM, qui retourne le port.
+
+B - Bases des CAM: Ils rentrent un peu plus profond dans l'architecture. Chaque mot a une seule \emph{match line} (ML), partagée entre tout les bits du mot. Si un seul ou plus des bits de contenu ne contient pas le bit placé sur la \emph{search line} (SL), alors tout la ML se décharge (donc pas besoin de `porte ET' sur les bits). Les lignes préchargées passent au travers d'amplificateurs (\emph{Match-Line Sense Amplifier}, MLSA) avant de rentrer dans l'encodeur.
+
+II - Core cells and Matchline structure: principaux circuits d'implémentation de cellules BCAM et TCAM.
+
+\begin{description}
+	\item[Cellules NOR 10-T:]{le classique. Une cellule SRAM flanquée de 4 transistors d'évaluation, deux de chaque côté du double-inverseur de la SRAM. Chaque paire de 2 transistors est reliée en série (logique ET), avec une grille sur la SL, et l'autre sur la BL (inversée par rapport à la SL). Si SL $\neq$ BL, alors la logique ET crée un chemin entre la ML et la masse et décharge la ML. On l'appelle NOR parce que la matchline n'est à `1' que si aucun des chemins de pulldown n'est activé.}
+	\item[Cellules NAND 9-T:]{structure différente, avec moins de transistors mais dont la matchline accumule une perte de $V_{th}$ par bit, ce qui limite son intérêt. La chaîne de transistors le long de la matchline forme une porte `ET' (le MLSA inverse la sortie logique donc NAND).}
+\end{description}
+
+C - Cell variants: cellules moins courantes mais qui existent. 
+
+\begin{description}
+	\item[La NOR-9T:] qui fonctionnne sur le principe de la NAND-9T mais avec des chemins de pulldown. 
+	\item[La NAND-10T:] qui fonctionne sur le principe de la NOR-9T, mais accumule aussi des pertes de seuils. Elle double même le nombre de seuils perdus puisqu'on a deux NMOS en série le long de chaque segment de la ML.
+\end{description}
+
+D - Ternary cells:
+
+Il faut deux cellules SRAM-6T pour implémenter les trois états possible. Le dernier état en trop est interdit.
+
+Encodage:
+\begin{itemize}
+	\item 0: $D = 0$
+	\item 1: $D = 1$
+	\item X: $D = 1$ et $\overline{D} = 1$ en même temps
+\end{itemize}
+
+Il y a deux manières de chercher avec des `don't care': 1 - stocker \texttt{`11'} sur la cellule, produit un \emph{match} peu importe la SL; 2 - Placer $SL = 0$ et $\overline{SL} = 0$ sur la \emph{searchline}, produit un \emph{match} peu importe les valeurs stockées dans les cellules.
+
+On peut rendre le layout plus compact en remplaçant les NMOS par des PMOS, pour des raison d'agencement physique des transistors; mais ça vient avec la contrepartie de la faible mobilité des PMOS, qui ralentit la recherche et augmente la consommation d'énergie.
+
+Il y a aussi des TCAM NAND, qui fonctionnent avec un bit masque (M) ajouté dans une cellule SRAM dédiée en parallèle au transistor \emph{match} d'une CAM NAND-9T normale: quand $M = 1$, la ML est toujours à 1 peu importe la BL (`X'). On peut aussi mettre $SL$ et $\overline{SL}$ à 0.
+
+E - Structures de matchlines
+
+NOR: La recherche se fait en 3 phases:
+\begin{enumerate}
+	\item Mettre les $SL$ et $\overline{SL}$ à 0 pour déconnecter les ML de la masse.
+	\item Précharger les ML à `1' à travers un PMOS dédié à cette tâche.
+	\item Charger le mot cherché sur les SL. Les résultats apparaissent en sortie du MLSA.
+\end{enumerate}
+
+La recherche NOR est rapide parce que la ML ne se décharge qu'à travers 2T dans le pire des cas (beaucoup moins que les NAND).
+
+NAND: la ML est segmentée le long de la chaîne des BCAMs jusqu'au MLSA.
+\begin{enumerate}
+	\item Couper le transistor d'évaluation qui relie la chaîne de la ML à la masse.
+	\item Charger les SL et $\overline{SL}$ avec le mot.
+	\item Préchercher la \emph{matchline} à partir de son noeud le plus proche du MLSA. La tension se propage le long de la chaîne avec perte de seuils.
+	\item Si tout les bits `trouvent' alors toute la ML est reliée à la masse par le transistor d'évaluation en bout de la ligne - $ML = 0$. Sinon, il suffit d'un seul transistor qui ne `trouve' pas pour couper la chaîne et faire en sorte que $ML = 1$ ($ML = 0 \donc \textrm{match}, ML = 1 \donc \textrm{non-match}$).
+\end{enumerate}
+
+Un problème de partage de charge se pose si la capacité du segement de ML préchargée est faible par rapport à celle l'ensemble de la ligne quand plusieurs transistors se ferment. La charge se diffuse le long de la ligne, donc la tension de précharge baisse. Elle peut baisser jusqu'au point où le MLSA détecte par erreur une tension basse - un faux \emph{match}. Pour y remédier on peut précharger les noeuds intermédiaires en mettent $SL$ et $\overline{SL}$ à `1', mais ça consomme de l'énergie.
+
+Le gros avantage de la NAND est consommer peu d'énergie sur les cellules qui ne trouvent pas le mot, ce qui est le cas de la grande majorité des cellules, voire toutes sauf une, ne contiennent normalement pas le mot. L'énergie de précharge n'est pas dissipée dans la masse tant que la matchline n'est fermée sur tout les bits. Les NOR consomment au contraire quand on pas de \emph{match}.
+
+Le plus gros défaut dans la NAND est son délai, qui augment avec le carré du nombre de bits par mot (R et C et série des transistors). On limite en général à 8 ou 16 bits en conséquence.
+
+Les NOR-10T sont les plus utilisées en pratique.
+
+III - Matchline Sensing Schemes
+
+(à partir de ce point je ne fais que résumer les grandes idées)
+
+\boite{\gras{Aparté:} Mémoire HBM $\fleche$ \emph{High-Bandwidth Memory}, type de dé de mémoire pour GPU placé dnas le même boîtier que celui-ci, relié au GPU par un \emph{silicon interposer}, pont entre les deux. Une HBM est un empilement d'un dé `contrôleur HBM' placé au bas de la pile en contact avec l'interposeur, et de plusieurs dés de DRAM par-dessus (3D \emph{stacked silicon}). Certains gros FPGAs Xilinx peuvent implémenter des CAM en HBMs \cite{noauthor_content_nodate}.}
+
+A - Modèle de puissance de système de précharge conventionnel: les circuits de charge-décharge sont modélisés avec la capacité de la ML et la résistance des transistors de décharge. Ils en déduisent les équations de temps de lecture et de puissance. Pour synchroniser le timing de l'opération on peut ajouter un mot inutilisé mais qui décharge sa matchline sur chaque cycle et toujours sur le cas le plus long.
+
+B - Low-swing: exemple d'une architecture qui précharge la ML a une tensions sous VDD avec un condensateur \emph{tank} de précharge, dont la charge vient s'étaler le long de la cpacité de la ML ensuite (moins d'énergie utilisée au total, sans qu'on aie eu besoin d'un rail de tension supplémentaire).
+
+C - Current-race scheme: la ML et la SL se préchargent en même temps à VSS, donc les transistors de décharge se ferment ou pas. Ensuite, une source de courant tente de charger la ML à `1', à son rythme. Si un des bits était en échec, la ML reste à `0' car reliée à la masse (current-race avec la source de courant). Sinon, la ML charge un transistor jusqu'à $V_{th}$, et le résultat réécrit un latch.
+
+D - Précharge sélective: évaluer les 2-3 premiers bits d'abord, n'évaluer le reste du mot que si les premiers bits trouvent. Implémentation: monter les premières cellules les plus proches du point de précharge en NAND, le reste en NOR. Les NAND ne transmettent la précharge aux autres cellules que si tous leurs transistors le long de la ligne sont fermés. Cette implémentation est un moyen simple et courant d'économiser l'énergie.
+
+E - Pipelinage: la ML est subdivisée par des registres. La sortie de chaque registre sert de enable aux étages suivants; donc dès qu'un étage ne match pas la recherche cesse.
+
+F - Current-saving: Idem que C, sauf qu'on ajout un contrôleur à la source de courant. Le contrôleur prend $V_ML$ en entrée, injecte d'autant plus de courant que $V_{ML}$ est grand; le résultat étant que $V_{ML}$ monte quand trouve, alors que l'on tire peu de courant si l'on rate (surtout si plusieurs bits ratent). L'approche économise donc beaucoup de courant.
+
+Toutes les approches proposées économisent $\environ 1/3$ d'énergie par rapport à l'approche conventionnel, au prix d'une augmentation de complexité.
+
+IV - Searchline Driving Approaches
+
+En conventionnel on charge les SL avec des drivers faits d'une série d'inverseurs dont la taille augmente de façon exponentielle. Les approches dont la ML se précharge bas sauvent $50\%$ d'énergie sur la searchline, parce qu'on a pas besoin de décharger les SL pour éviter d'interférer avec la précharge ML ($50\%$ en moyenne des bits togglent par recherche).
+
+Approche hiérarchique: les SL normales, partagées entre tout les mêmes bits d'un mot, sont renommées GSL (Global Search Line) et n'alimentent plus directement les cellules. À la place, les GSL se subdivisent en LSL dont chaque branchement individuel `nourrit' une cellule CAM. Si une ML d'un bit d'un mot se décharge (rate), alors on désactive les LSL de l'étage suivant, ce qui sauve de l'énergie (mais rajoute de la complexité, et les économies peuvent être annulées par l'empreinte de la circuiterie supplémentaire.)
+
+V - Approches architecturales
+
+1 - Subdiviser la mémoire en banques sélectrionnées (activées) par quelques-uns des bits du mot. Pose des problèmes de capacité quand une banque se remplit disproportionnellement par rapport aux autres.
+
+2 - Précalcul: précalculer une valeur sur les contenus, ne cherche que dans les mots dont la valeurs précalculée correspond. Ex. calculer le nombre `1's, désactiver les mots qui ont un nombre différent (PB-CAM, \emph{Pre-Computation based CAM}), ce cas en particulier a l'avantage de permettre d'éliminer la moitié \og $\overline{SL}$ \fg des searchlines, par une coïncidence mathématique le résultat reste bon.
+
+3 - Encodage alternatif: utiliser un encodage alternatif qui utilise l'état \texttt{11} normalement inutilisé des TCAM  pour augmenter la densité d'information. Chaque combinaison de 4 demi-cellules TCAM fait trouve sur jeu unique de chiffres parmi $\{0,1,2,3\}$. Les demi-cellules forment des groupes de 4 partageant la même ML locale (LML). On forme des mots plus longs en reliant plusieurs LML sur une même ML globale (GML). Cette approche énonomise de l'espace en CAM en regroupant plusieurs entrées d'une table exact-match, ternaire ou LPM en une.
+
+VI - Future developments
+
+Section obsolète puisque l'article date de 2006, mais ils prévoient du développement dans l'utilisation de nouveaux types de mémoires, en particulier non-volatiles: MRAM, FRAM, etc. 15 ans plus tard on dirait bien que ça ne s'est pas réalisé.
+
+\gras{Avis:} Un excellent article d'introduction aux CAM, bien écrit, particulièrement dense en information. Les auteurs vont loin dans leur analyse des variations possibles sur le circuit de base des CAM. L'article ne fait cependant pas mention des émulation de CAM possible à partir de mémoire RAM; les utilisateurs FPGA devront creuser un peu plus.
+
+\clearpage
