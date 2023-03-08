@@ -1,0 +1,47 @@
+% Résumé de lecture
+
+\subsection{In-situ Programmable Switching using rP4: Towards Runtime Data Plane Programmability, \cite{feng_situ_2021}, Feng et al., Nov. 2021}
+\gras{Pertinence:} 2
+\gras{Sujets:} P4 reconfigurable dynamiquement, PISA
+
+\gras{Problématique:} Comment reconfigurer des commutateurs programmables P4 sans interrompre le service (sans les éteindre/rallumer pendant la configuration)?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Le modèle PISA empêche la reconfigurabilité, parce que les différentes couches de protocoles sont couplées dans le même parseur, le même pipeline de contrôle et le même désérialiseur; ce qui fait que l'on ne peut pas retirer/ajouter une fonctionnalité sans chambouler l'ensemble du programme. Les auteurs inventent une nouvelle méta-architecture (IPSA) plus adaptée à la reconfigurabilité, proposent un nouveau compilateur adapté à celle-ci (rP4), et ajoutent un nouveau simulateur comportemental pour aller avec (\texttt{ipbm}). Leur architecture vient avec une pénalité de surface et d'énergie d'environ 15\%, après essai sur FPGA (sans pipelinage).
+
+\gras{Résumé:}
+
+I - Introduction et proposition de valeur
+
+Les auteurs insistent sur la nécéssité d'ajouter la reprogrammabilité dynamique pour faires des tests de configurations, pouvoir installer puis retirer des fonctions de télémétrie INT dont on a besoin que temporairement, ajouter/enlever des fonctions de calcul-sur-réseau temporairement aussi, et expérimenter avec de nouveaux protocoles. La reconfigurabilité dynamique va aussi devenir essentielle au fur et à mesure qu'on avance vers des réseaux autonomes. Pour l'atteindre, ils réinventent toute la chaîne d'outils P4 depuis le début: méta-architecture, compilateur, simulateur.
+
+II - L'architecture IPSA
+
+Dans PISA, il y a un parseur, un pipeline de contrôle et un sérialiseur globaux pour toute la pile de protocole. L'implémentation de chaque couche réseau est fortement couplée aux autres; ce qui rend complexe toute mise-à-jour incrémentale. Leur architecture IPSA remédie à ce problème en séparant le traitement des couches, chacune placée dans un bloc dédié appelé TSP (Templated Stage Processor). Chaque TCP comprend le parseur, les tables et la logique de contrôle (pas de désérialiseurs). La pipeline d'un TSP à l'autre peut être flexible: les TSP peuvent être connectés linéairement, l'un après l'autre, ou un bus d'interconnexions (qu'ils appelent TM sans en définir l'acronyme) capable de sauter un ou plusieurs TSP; et qui connecte aussi le dernier TSP au désérialiseur global. Le TM permet d'insérer/enlever un TSP du pipeline sans reconfigurer toute la chaîne.
+
+Concernant les tables, les TSP ne font que pointer vers des blocs de SRAM/TCAM allouée d'un bassin global auxquel les TSP sont connectés au moyen d'un crossbar.
+
+III - Le rP4
+
+Le rP4 est un nouveau langage basé sur P4 pour programmer selon le paradigme IPSA. Ils ont conçu toute une panoplie d'outils pour développer avec:
+\begin{itemize}
+	\item{\texttt{rp4fc} (rP4 front-compiler): transpile le P4 normal en syntaxe rP4, génère aussi l'API pour le plan de contrôle (?)}
+	\item{\texttt{rp4bc} (back-compiler): donne un JSON adapté à la cible, qui indique sur quels blocs les TSP doivent être placés. Il peut aussi générer des m-à-j incrémentales, ajout/suppression de TSP dans le chemin. Leurs algorithmes priorisent la latence au détriment de la surface.}
+\end{itemize}
+
+IV - Implémentation et évaluation
+
+TODO
+
+V - Synthèse matérielle et résultats
+
+TODO
+
+VI - Littérature similaire
+
+TODO
+
+\gras{Avis:} TODO
+
+\clearpage
