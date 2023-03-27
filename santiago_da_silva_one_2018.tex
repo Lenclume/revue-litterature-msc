@@ -1,0 +1,29 @@
+% Résumé de lecture
+
+\subsection{One for All, All for One: A Heterogeneous Data Plane for Flexible P4 Processing, \cite{santiago_da_silva_one_2018}, Jeferson Santiago da Silva, 2018}
+\gras{Pertinence:} 3 (un des rares papiers sur les plans de données programmables, en plus c'est de notre groupe)
+\gras{Sujets:} Plans de données hétérogènes
+
+\gras{Problématique:} Comment combiner les points forts de plusieurs cibles P4?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Ils créent le concept de HDP, plan de données hétérogène, plateforme comprenant plusieurs cibles en une.
+
+\gras{Résumé:} 
+
+I - Introduction
+
+Les cibles P4 sont soit flexibles mais lentes (CPU, FPGA), soit performantes mais rigides (ASIC). Les externs de l'un ne sont pas transférables à l'autres. L'idée du papier est d'intégrer plusieurs cibles en parallèle sur le chemin de données, par exemple un FPGA utilisé avec un ASIC. Le FPGA n'est pas utilisé que comme accélérateur d'une cible mais bien comme cible à part entière.
+
+II - Plan de données hétérogènes
+
+Un programme P4 générique serait compilé par un outil dédié vers plusieurs cibles. Il n'est pas fait mention du partitionnement explicitement. La communication entre les plusieurs cartes peut se faire par Ethernet ou PCIe.
+
+III - Preuve de concepts
+
+ Ils ont pas encore implémenté le compilateur/partitionneur, leur test s'est fait avec un partitionnement à la main, BMv2 (à ce moment-là il y avait pas la switch Tofino au lab) + FPGA ZCU706, P4 compilé sous SDNet. En guise de résultats ils ont implémenté une switch L2, et vérifié qu'ils arrivaient à la partitionner, utiliser des externs agnostiques (?), et étendre les tables sur la DDR3 de la carte FPGA sans affecter les performances.
+
+\gras{Avis:} L'intérêt de l'article est d'introduire l'idée de plateforme hétérogène, qui n'existait pas jusqu'alors, et ouvre beaucoup de portes. L'article est court, et n'a pas encore de résultats quantitatifs. Un bon point de départ pour nos travaux sur le HDP. Si ça en avait tenu à moi je l'aurais appelé \emph{plan de données composite}, pas hétérogène.
+
+\clearpage
