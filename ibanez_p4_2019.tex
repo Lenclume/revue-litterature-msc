@@ -1,0 +1,68 @@
+% Résumé de lecture
+
+\subsection{The P4$\rightarrow$NetFPGA Workflow for line-rate packet processing, \cite{ibanez_p4_2019}, Ibanez, Brebner, McKeown, Zilberman, Fév. 2019}
+\gras{Pertinence:} 2
+\gras{Sujets:} P4->HDL, Outils
+
+\gras{Problématique:} Comment compiler directement le P4 pour un FPGA, sans passer par l'étape de codage HDL?
+
+\gras{Prérequis:} (Optionnel) SNMP \cite{noauthor_simple_2023} \cite{digitalocean_introduction_nodate}
+
+\gras{Réponse:} Leur plateforme NetFPGA, s'appuie sur le compilateur Xilinx SDNet. Le HDL produit par SDNet cible le modèle de commutateur simple SimpleSUMESwitch, conçu d'abord pour l'enseignement.
+
+\gras{Résumé:} 
+
+I - Introduction
+
+Les versions précédentes de la NetFPGA devaient se programmer en HDL; maintenant ils proposent un flot de conception pour obtenir des designs fonctionnels en écrivant que du P4. Étant donnée que toute l'industie s'est standardisée sur P4, il faut que les cibles se standardisent dessus aussi.
+
+II - La langage P4 en général
+
+Rappels sur ce que sont un parseur P4 et un bloc de contrôle. Rappels sur la syntaxe du parseur des états, extractions d'en-têtes, blocs de contrôle, logique \texttt{apply}, actions, tables. Idem pour les bus de métadonnées. Idem pour les \texttt{extern}.
+
+III - SDNet
+
+Xilinx avait créé SDNet à la base pour son propre langage PX, similaire mais antécédant à P4. Avant 2019 il transpilait le P4 en PX, et depuis il compile directement le P4. Il en sort des modules Verilog (SystemVerilog sur la dernière version?), et un banc de test SystemVerilog, un pilote C pour le plan de contrôle et un modèle C++ (pourquoi faire?). Le résultats prend $\environ2\fois$ plus de ressources qu'un modèle VHDL fait à la main (!).
+
+IV - La carte NetFPGA SUME 10G
+
+Les NetFPGA existante depuis 15 ans. Les commutateurs implémentés dessus utilisent l'architecture suivante:
+
+$$ MAC (SFP ou DMA Rx (?)) \fleche Input arbiter \fleche Output port lookup (le P4 compilé vient dans ce bloc) \fleche Output queue (BRAM) \fleche MAC (SFP ou DMA Tx (?))$$
+
+Le tout est contrôlé par un $\mu$Blaze connecté par AXI.
+
+V - Le flot P4$\rightarrow$NetFPGA
+
+On devrait pas avoir à toucher au code HDL, juste au P4, pour obtenir un commutateur fonctionnel. Les \texttt{externs} servent surtout à implémenter tout ce qui est \emph{stateful} - d'ailleurs ils en ont un certain nombre de déjà implémentées et utilisables pour ça. On peut ajouter nos propres externs, implémentés en HDL. Il faut ensuite les ajouter à des fichiers de configurations (lesquels?).
+
+Les simulations se font en deux étapes
+\begin{enumerate}
+	\item Lancer le testbench généré par SDNet avec des paquets générés.
+	\item Rouler une commande qui intègre le HDL SDNet sortant au NetFPGA, et le simuler.
+\end{enumerate}
+
+L'outil génère aussi une API Python pour le plan de contrôle; pour être précis c'est un wrapper par-dessus les API C générées par SDNet.
+
+Le flot de conception ne supporte que le SimpleSumeSwitch. Pour d'autres architectures, il faut remettre les mains dans le HDL.
+
+VI - Cas d'utilisation en recherche en enseignement
+
+Beaucoup de travaux de recherche ont déjà été implémentées avec P4$\fleche$NetFPGA: télémétrie, \emph{load-balancer}, etc.
+
+VII - Améliorations futures
+
+Ils veut intégrer P4Runtime à la chaîne d'outils à la place de l'API Python existante, et rendre l'arhcitecture plus flexible dans la NetFPGA elle-même pour qu'on soit plus limités à l'architecture SimpleSumeSwitch.
+
+VIII - Comparaisons aux solution P4-à-HDL existantes
+
+Il y a eu beaucoup de tentativves de faire de la compilation P4 par l'intermédiaire de HDL: C, C++, Bluespec. Celui de Benacek \og P4-to-HDL \fg est en source fermée donc pas utilisable par la communauté.
+
+IX - Comment commencer à l'utiliser: suivre les tutoriels en ligne pour faire fonctionner la chaîne d'outils. Ils espèrent avoir des contributions.
+
+X - Conclusion: La NetFPGA remplit bien son rôle d'intermédiaire entre l'émulation logicielle et les ASICs très chers.
+
+\gras{Avis:} Les auteurs comparent leur solution aux flots P4->HLS->FPGA existants (ils citent Jeferson \cite{santiago_da_silva_p4-compatible_2018}). Leur solution se démarque par sa facilité d'utilisation: elle est intégrée aux outils et passe directement du P4 au FPGA sans passer par l'intermédiaire d'un HLS, et maintenue sur le long terme (on le saura!)
+
+
+\clearpage
