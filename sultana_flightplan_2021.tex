@@ -1,0 +1,51 @@
+% Résumé de lecture
+
+\subsection{Flightplan: Dataplane Disaggregation and Placement for P4 Programs, \cite{sultana_flightplan_2021}, Sultana, 2021}
+\gras{Pertinence:} 3 (article d'introduction à l'outil le plus abouti pour l'hétérogène)
+\gras{Sujets:} Plans de données hétérogènes
+
+\gras{Problématique:} Comment rendre le code P4 réellement indépendant de la cible, et supporter les plans de données hétérogènes?
+
+\gras{Prérequis:} Plans de données hétérogènes \cite{santiago_da_silva_one_2018}
+
+\gras{Réponse:} Leur outils FlightPlan, qui partitionne automatiquement les sections d'un code P4 générique, puis le transpile vers un P4 spécifique à chaque cible et compilable avec les outils pré-existants. L'outils prend en entrée, entre autres, les définitions des cibles, la topologie du plan de données et les priorités (latence/débit/surface/énergie) du système.
+
+\gras{Résumé:} 
+
+Plan:
+
+I - Importance de la désaggrégation
+
+À l'heure actuelle, les compilateurs P4 ne prennent qu'une cible à la fois. Le programmeur ne peut donc pas faire abstraction du matériel par rapport au programme; et certains programmes ne peuvent pas tourner sur des cibles rapides mais inflexibles (ex. Tofino) ou flexibles mais trop lentes (CPU). La désaggrégation résoud ces deux problèmes en créant un niveau d'abstraction au-dessus du P4 spécifique au matériel et en combinant les meilleurs caractérisques de plusieurs cibles, et en évitant les pires.
+
+II - Difficultés d'implémentation des plans de donnée hétérogènes
+
+La désaggrégation manuelle serait trop difficile parce qu'il faudrait connaître tout le détail des besoins de l'application et ceux du matériel. C'est le genre de complexité qui peut être soulagée par des outils.
+
+III - Description de leur solution
+
+Flightplan prend en entrée un programme P4 agnostique au matériel, et retourne plusieurs programmes P4 spécifiques aux cibles. Son fonctionnement se fait en trois phases:
+
+\begin{itemize}
+	\item Analyse: sépare le code en segments, estime ses besoins en ressources
+	\item Génération de `plan': assigne les segments aux cibles, les fusionne si ça permet d'optimiser.
+	\item Gestion des programmes en cours de fonctionnement
+\end{itemize}
+
+L'analyseur génère des règles en fonction du code P4 monolithique, une description des cibles, la topologie et d'autres choses dont les priorités du système. Le résultat donne des programmes P4 passés aux compilateurs existants ex. SDNet ou p4c vers le BMv2.
+
+IV - Évaluation
+
+Leurs résultats montrernt que les HDP peuvent rajouter ou enlever de la latence, selon les cas. L'ajout de latence vient du traffic échangé entre les cibles pendant le traitement, et de l'ajout de métadonnées en plus (?).
+
+Ils ont un utilitaire en ligne de commande pour contrôler l'exécution du programme.
+
+\gras{Handover} (définition vocabulaire): émission d'un paquet d'une cible vers une autre au sein même du plan de donnée.
+
+L'auteur a publié une vidéo pour la conférence NSDI2021, mais qui ne donne pas d'information en plus par rapport au texte.
+
+\gras{Avis:} Le billet de blog est un résumé de leur article détaillé sur le fonctionnement de FlightPlan. Ils l'ont testé sur un banc de test matériel de taille impressionante: Tofinos, 5-10 cartes FPGA, le tout fait la taille d'une armoire. Cependant, les fichiers de configuration ex. propriété des cibles, etc. sont complexes, une mise en oeuvre pratique va probablement s'avérer très complexe et impliquer d'appeler les auteurs. Aussi, Flightplan ne segmente pas automatiquement le programme: le programmeur doit lui-même annoter les blocs de code pour définir les segments à partitionner.
+
+Ils ont aussi une démo avec une figure en 3D qui illustre la circulation des paquets sur le plan de données désaggrégé; sensée donner un visuel intuitif de la topologie, mais je ne la trouve ni claire ni intruitive.
+
+\clearpage
