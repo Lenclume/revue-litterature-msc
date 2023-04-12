@@ -1,0 +1,37 @@
+% Résumé de lecture
+
+\subsection{Baidu Intelligent Cloud - Intel® Tofino™ Expandable Architecture, 2022 (je pense)}
+\gras{Pertinence:} 2 (un cas pratique de l'utilisation de l'hétérogène)
+\gras{Sujets:} HDP
+
+\gras{Problématique:} Comment intégrer un plan de données hétérogène avec Tofino dans une application commerciale?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} 
+
+\gras{Résumé:} Les auteurs se servent du Tofino comme \emph{Cloud Gateway} entre l'intérieur et l'extérieur du centre de données. Avant ils utilisaient des commutateurs traditionnels, qu'ils ont remplacés par des x86, puis par des Tofinos. Leur prochaine étape est le système hétérogène Tofino/FPGA pour augmenter la taille des tables.
+
+\gras{Evolving Cloud Compute and Memory Architectures}
+
+Les charges de travail du nuage moderne ont des besoins en ressources de plus en plus variés et déséquilibrés (ex. mémoire, CPU, GPU, accélérateurs). Pour les gérer on a déjà les VMs et les conteneurs, qui séparent les environnements et regroupent les ressources en CPU/Mémoires. La désaggrégagtion des cibles est le prochain pas naturel de la virtualisation.
+
+\gras{Evolving Cloud Network Architectures and Gateway}
+
+Ils sont intéressés par le P4 et le Tofino pour le calcul-sur-réseau, la télémétrue et l'accélération ML. Au fur et à mesure que les charges augmentent on peut plus jsute rajouter des Tofinos horizontalement; on manque de place pour les tables: $\environ $ 1M entrées pour le VxLAN et le VM-NC, 100M pour le SNAT, des dizaines de Go pour les buffers de sortie. Les cartes FPGA sont utilisées pour leurs mémoires.
+
+\gras{Usage du Tofino avant l'hétérogène}
+
+Ils servaient de routeurs virtuels pour des sous-réseau virtuels de VMs et VPCs. Ils mettent aussi des filtres de paquets, pare-feu, et autres.
+
+Usage principal: \emph{Server Load Balancing} (SLB): assignation d'un serveur virtuel à un serveur physique. Le Tofino doit maintenir $10^5$ tables pour les sessions ouvertes.
+
+DPDK: accélérateur de switches logicielles, efficaces pour faire fonctionner les commutateurs x86 mais pas au point de les rendre désirables par rapport au Tofino. Malgré DPDK les latences des commutateurs logiciels sont très loin du Tofino: $1ms$ contre $30\mu s$.
+
+\gras{Usage du Tofino avec FPGA: Baidu Tofino Expandable Architecture Gateway}
+
+Les FPGA servent de grosses caches mémoire pour les sessions ouvertes. Quand on reçoit un paquet, si le Tofino n'a pas la session dans sa mémoire interne il s'adresse au FPGA. Si le FPGA ne l'a pas non plus il s'adresse au x86, qui ouvre une nouvelle session. À l'avenir ils veulent rajouter plus de foncitons sur leur plateforme: ACL, NAT, mesure de trafic, sécurité.
+
+\gras{Avis:} Un article simple, qui décrit un usage commercial existant de l'hétérogène.
+
+\clearpage
