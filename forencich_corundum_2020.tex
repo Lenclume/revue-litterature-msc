@@ -1,0 +1,20 @@
+% Résumé de lecture
+
+\subsection{Corundum: An Open-Source 100-Gbps Nic, \cite{forencich_corundum_2020}, Forencich et al., 2020}
+
+\gras{Pertinence:} 3 (décrit le fonctionnement de la soft NIC qui m'a l'air la plus prometteuse)
+\gras{Sujets:} NICs, interface matériel/logiciel
+
+\gras{Problématique:} Quelle est l'utilité d'une soft NIC sur FPGA? Comment est-ce-qu'ils ont implémenté une NIC capable de monter jusqu'aux 100 Gbps? Quelles fonctionnalités rendent la NIC flexible?
+
+\gras{Prérequis:} Compréhension générale des NICs \cite{patterson_computer_2017}, TDMA \cite{noauthor_time-division_2022}, IEEE-1588 PTP \cite{noauthor_precision_2023}, mémoire segmentée \cite{noauthor_memory_2023}
+
+\gras{Réponse:} Les générateurs ASICs ne sont pas assez flexibles pour le prototypage et l'innovation rapide; les générateurs logiciels sont trop lents pour le \an{linerate} d'aujourd'hui. Les générateurs sont un entre-deux. La smartNIC Corundum atteint ses performances en  pipelinant agressivement le design et en exploitant l'interface PCIe en dur des architectures Ultrascale+, ce qui lui permet d'être cadencé à 250 MHz. Il transfert les données de l'hôte à la NIC par DMA.
+La NIC est prévue comme plateforme de développement modulaire. Entre autres, on peut changer l'ordonnanceur des ports de sortie, et les modules sont tous codés en Verilog open-source. On peut configurer le deisgn en changeant les paramètres génériques Verilog; le pilote logiciel s'y adapte automatiquement.
+
+\gras{Résumé:} 
+
+
+\gras{Avis:} L'article assume que l'on comprend déjà très bien le fonctionnement d'une NIC. Il condense beaucoup d'information en peu d'espace, l'article aurait facilement pu faire 15 pages. Il n'est malheureusement pas fait mention de la manière dont on peut ajouter des fonctions personnalisées quelconques dans le chemin de données.
+
+\clearpage

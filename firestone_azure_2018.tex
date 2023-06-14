@@ -1,0 +1,18 @@
+% Résumé de lecture
+
+\subsection{Azure accelerated networking: SmartNICs in the public cloud, \cite{firestone_azure_2018}, Firestone et al., 2018}
+
+\gras{Pertinence:} 3
+\gras{Sujets:} Plan de données hétérogène, accélérateurs FPGA, centres de données
+
+\gras{Problématique:} Comment accélérer la pile réseau des hôtes de VMs infonuagiques, sans perdre en programmabilité, dans un contexte commercial?
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Ils ont créé leur propre smartNIC à l'architecture hétérogène: la carte utilise un ASIC NIC conventionnel, et un FPGA placé en configuration \an{bump-in-the-wire} entre le ASIC et le PHY. L'hôte a deux liens PCIe directs: un avec le ASIC, l'autre avec le FPGA. Les accélérations sont transparentes du point de vue de la pile logicielle. Le développement des accélérateurs doit utiliser un flot de conception itératif comme le développement logiciel, plutôt qu'un flot inspiré des ASICs avec son lot de spécifications et vérifications strictes.
+
+\gras{Résumé:} 
+
+\gras{Avis:} Un article pragmatique, qui décrit le plan de données hétérogène tel qu'applicable commercialement. Vers la fin de l'article ils mentionnent qu'ils aimeraient appliquer le P4 à ce genre d'application; même si celui-ci ne peut pas encore modéliser tout les comportements d'une smartNIC, uniquement les transformations de paquets.
+
+\clearpage

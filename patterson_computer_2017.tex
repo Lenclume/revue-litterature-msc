@@ -1,0 +1,63 @@
+% Résumé de lecture
+
+\subsection{Computer Organization and Design: the Hardware/Software Interface, Section 6.9: Communicating to the Outside World, Cluster Networking, \cite{patterson_computer_2017}, Patterson \& Hennessy, 2017}
+
+\gras{Pertinence:} 3 (traite directement du fonctionnement des NICs)
+\gras{Sujets:} NICs, interface matériel/logiciel
+
+\gras{Problématique:} Décrire l'architecture globale d'une NIC, et la manière dont elle interagit avec le logiciel.
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} La section décrit sommairement le matériel de la NIC, puis décrit les procédures d'envoi et de réception de paquets, et explique ce qu'est un pilote. Elle se conclue par une série des méthode les plus communes pour améliorer les performances à partir du schéma de base donnée au début du chapitre: placer les buffers de transmission en espace utilisateur, contourner le noyau, utiliser du \emph{polling} au lieu d'interruptions, calculer les CRC dans le MAC, dédier une zone de cache au IO, accélérer le TCP/IP en plus d'Ethernet, et donner un accès direct du VMM aux buffers IO des machines virtuelles.
+
+\gras{Résumé:} 
+
+Les NICs interconnectent les points des grapes de calculs, et révêtent donc un grande importance quant à sa performance globale.
+
+\gras{Architecture}
+
+La NIC se connecte à une hôte par le bus PCIe. Le coeur de la NIC est son moteur DMA, qui transfère des données de l'hôte vers des tampons interne, aussi connectés à l'interface réseau. L'interface réseau contient plusieurs MACs intégrés, chacun suivi d'un PHY qui place les paquets sur le support physique (cage QSFP/câble CAT). L'hôte et la NIC s'échangent à la fois des données et des messages de contrôle générés par le pilote.
+
+\boite{
+\gras{Pilote}: bibliothèque d'abstraction de la couche bas-niveau du matériel. Fournit une interface aux programmes utilisateurs, qui ne peuvent accéder au matériel qu'à travers lui puisque l'espace mémoire I/O n'est pas adressable depuis leur espace de mémoire virtuelle.
+}
+
+\gras{Rôle du système d'exploitation}
+
+L'OS arbitre l'accès à la NIC entre les multiples processus qui en ont besoin en même temps, capte les interruptions levées par la NIC, et gère les opérations bas-niveau par le biais du pilote.
+
+\gras{Procédure de transmission/réception}
+
+Pour transmettre:
+\begin{enumerate}
+	\item{Le programme \emph{userspace} alloue et remplit un \emph{buffer} avec les paquets à envoyer}
+	\item{Le pilote copie le \an{buffer} dans un autre \an{buffer}, en \an{kernel space}. }
+	\item{La NIC transfère le \an{buffer} dans sa mémoire interne par une requête DMA sur le PCIe. Cette étape prend les 3/4 du \
+	temps de latence.}
+	\item{La NIC génère une interruption à la fin du transfert, puis envoie les paquets sur une de ses interfaces MAC.}
+	\item{L'hôte libère le \an{buffer} \an{kernel space}.}
+\end{enumerate}
+
+Pour recevoir: la procédure est similaire, mais la NIC initie les transferts DMA sans avoir reçu d'instruction du pilote.
+
+\gras{Améliorations possibles}
+
+Elle se conclue par une série des méthode les plus communes pour améliorer les performances à partir du schéma de base donnée au début du chapitre: placer les buffers de transmission en espace utilisateur, contourner le noyau, utiliser du \emph{polling} au lieu d'interruptions, calculer les CRC dans le MAC, dédier une zone de cache au IO, accélérer le TCP/IP en plus d'Ethernet, et donner un accès direct du VMM aux buffers IO des machines virtuelles.
+
+Améliorations logicielles:
+\begin{enumerate}
+	\item{Éviter les copies de \an{buffers} entre l'espace utilisateur et le noyau avec un DMA pouvant directement transférer à partir de l'espace utilisateur.}
+	\item{Contourner le noyau en allouant l'espace \emph{memory-mapped IO} de la NIC directement à un programme dans l'espace utilisateur. Le noyau ne voit même pas la NIC.}
+	\item{Éviter les interruptions en utilisant du \an{polling} à la place.}
+\end{enumerate}
+
+Améliorations matérielles:
+\begin{enumerate}
+	\item{Remplir la plupart des champs de l'en-tête MAC en matériel dans l'unité MAC dédiée; accélérer aussi les autre couches de la pile TCP/IP.}
+	\item{Dédier une zone de la cache de plus haut niveau au IO pour éviter transférer par la DRAM (\emph{Direct Data IO}, DDIO). Pose des problèmes de cohérence de cache.}
+\end{enumerate}
+
+\gras{Avis:} Une section extrêmement utile pour comprendre les NICs en général, à considérer comme un prérequis avant de se plonger dans de la littérature plus avancée sur la génération de paquets. Par contre, le texte ne rentre pas dans les détails et ne suffit pas à avoir une compréhension profonde des NICs.
+
+\clearpage

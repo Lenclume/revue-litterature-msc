@@ -1,0 +1,17 @@
+% Résumé de lecture
+
+\subsection{An FPGA-based HW/SW Co-Verification Environment for Programmable Network Devices, \cite{su_fpga-based_2022}, Mengsue, Bill P., Yvon S., JPD, Thomas L., 2022}
+
+\gras{Pertinence:} 3
+\gras{Sujets:} Générateurs de trafic, vérification, NetFPGA
+
+\gras{Problématique:} Comment déboguer un pipeline de traitement directement sur le matériel du plan de données?
+\gras{Prérequis:} Aucun
+
+\gras{Réponse:} Ils insèrent une variante d'ILA dans le FPGA, branché sur les points de connexion de chaque étage du pipeline. Ils commencent tester le DUT avec un banc de test HDL. Les entrées et sorties du banc de tests sont enregistrées dans un fichier. Les entrées sont passées à l'ILA, qui le passe au DUT matériel, et en récupère les sorties avant de les repasser à l'hôte. On compare enfin les sorties des deux modèle, ce qui permet de déceler les bogues résultant de l'implémentation FPGA (ex. problèmes de timing). L'ILA communique avec l'hôte d'une NetFPGA avec un processeur softcore embarqué (probablement un $\mu$Blaze). L'ILA peut aussi collecter des données au milieu de plan de contrôle, par exemple entre deux étages de tables \an{match-action}.
+
+\gras{Résumé:} 
+
+\gras{Avis:} Un module de vérification qui a beaucoup de sens; j'aime l'idée d'un analyseur logique fonctionnant en coopération avec l'hôte.
+
+\clearpage
