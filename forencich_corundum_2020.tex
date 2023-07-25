@@ -1,13 +1,13 @@
 % Résumé de lecture
 
-\subsection{Corundum: An Open-Source 100-Gbps Nic, \cite{forencich_corundum_2020}, Forencich et al., 2020}
+\subsection{Corundum: An Open-Source 100-Gbps Nic, \cite{forencich_corundum_2020}, Forencich et al., FCCM, 2020}
 
 \gras{Pertinence:} 3 (décrit le fonctionnement de la soft NIC qui m'a l'air la plus prometteuse)
 \gras{Sujets:} NICs, interface matériel/logiciel
 
 \gras{Problématique:} Quelle est l'utilité d'une soft NIC sur FPGA? Comment est-ce-qu'ils ont implémenté une NIC capable de monter jusqu'aux 100 Gbps? Quelles fonctionnalités rendent la NIC flexible?
 
-\gras{Prérequis:} Compréhension générale des NICs \cite{patterson_computer_2017}, TDMA \cite{noauthor_time-division_2022}, IEEE-1588 PTP \cite{noauthor_precision_2023}, mémoire segmentée \cite{noauthor_memory_2023}
+\gras{Prérequis:} Compréhension générale des NICs \cite{patterson_computer_2017}, TDMA \cite{noauthor_time-division_2022}, IEEE-1588 PTP \cite{noauthor_precision_2023}, mémoire segmentée \cite{noauthor_memory_2023}, transferts \an{Scatter/gather} \cite{noauthor_gatherscatter_nodate}, buffers circulaires \cite{noauthor_circular_2023} \cite{wada_ring_2013}, Interfaces AXI-Stream et AXI-Lite \cite{dan_guisselquist_learning_2022} \cite{dan_guisselquist_axi_2021} \cite{dan_guisselquist_using_2018} \cite{dan_guisselquist_building_2019}
 
 \gras{Réponse:} Les générateurs ASICs ne sont pas assez flexibles pour le prototypage et l'innovation rapide; les générateurs logiciels sont trop lents pour le \an{linerate} d'aujourd'hui. Les générateurs sont un entre-deux. La smartNIC Corundum atteint ses performances en  pipelinant agressivement le design et en exploitant l'interface PCIe en dur des architectures Ultrascale+, ce qui lui permet d'être cadencé à 250 MHz. Il transfert les données de l'hôte à la NIC par DMA.
 La NIC est prévue comme plateforme de développement modulaire. Entre autres, on peut changer l'ordonnanceur des ports de sortie, et les modules sont tous codés en Verilog open-source. On peut configurer le deisgn en changeant les paramètres génériques Verilog; le pilote logiciel s'y adapte automatiquement.
@@ -15,6 +15,77 @@ La NIC est prévue comme plateforme de développement modulaire. Entre autres, o
 \gras{Résumé:} 
 
 
-\gras{Avis:} L'article assume que l'on comprend déjà très bien le fonctionnement d'une NIC. Il condense beaucoup d'information en peu d'espace, l'article aurait facilement pu faire 15 pages. Il n'est malheureusement pas fait mention de la manière dont on peut ajouter des fonctions personnalisées quelconques dans le chemin de données.
+I - Introduction
+
+On en demande de plus en plus aux NICs, qui doivent s'adapter à trois changements:
+\begin{enumerate}
+	\item L'augmentation du débit (\an{linerate})
+	\item Leur utilisation pour le calcul distribué (hétérogène)
+	\item La virtualisation; l'accès à la NIC par des VMs
+\end{enumerate}
+
+Il a deux catégories de fonctions réalisées en matériel dans les NICs: 1 - le délestage de fonctions normalement calculées en CPU, par exemple le hashage; et 2 - les fonctions \an{linerate} qui doivent absolument se faire sur le matériel, par exemple l'horodatage (\an{timestamping}).
+
+Les SmartNICs sont apparues pour répondre à cette demande, mais d'après Forencich la flexibilité de leur matériel reste limitée par rapport aux FPGAs et leur performance n'est pas toujours suffisantes (sur ce point il cite \cite{firestone_azure_nodate}). Les NICs logicielles dont DPDK répondent au besoin de flexibilité, leur performance est limitée et non-déterministes quand on tombe dans l'ordre de la $\mu$s ou des ns. Les NICs FPGA commerciales ont de bonnes performances, mais leur conception est fermée, ruine l'intérêt d'avoir du matériel reconfigurable - d'où l'intérêt d'une NIC open-source.
+
+Il considère que les IPs DMA existantes ne sont pas adaptées à ses besoins, soit parce qu'elles ne sont pas faites spécifiquement pour le réseau, soit parce que leur nombre de files est insuffisant (?). La NetFPGA est conçue comme plateforme de traitement de paquets à usage général, pas comme NIC. Il existe aussi plusieurs NICs dont le FPGA est ajouté en sortie de chemin de donnée d'un ASIC réseau classique.
+
+II - Implémentation
+
+Liste des principales fonctionnalités de sa NIC: support pour un grand nombre de files (je ne comprends pourquoi c'est si nécessaire), regroupées par interfaces pouvant être associés à plusieurs ports (MACs) chacune. Tout est optimisé pour pouvoir ordonnancer le départ TDMA des paquets avec le plus de précision possible. L'algorithme d'ordonnancement est \an{round-robin} par défaut, mais est conçu pour être facilement interchangeable.
+
+A - Survol
+
+L'architecture est hiérarchisé à trois niveaux de modules qui s'instancient les uns les autres:
+\begin{itemize}
+	\item \texttt{top-level}: interface PCIe, horloge PTP, DMA.
+	\item \texttt{interface}: interface réseau telles que vues par l'OS hôte. Gère les files.
+	\item \texttt{port}: une instance par port physique. Gère l'accès au MAC.
+\end{itemize}
+
+Avoir plusieurs ports pour une interface peut servir à implémenter un balancement de trafic dans le matériel, transparent pour l'OS hôte qui ne voit qu'une interface.
+
+La transmission pour le contrôle se fait par AXI-lite, la transmission de paquets par AXI-S. Toute la NIC est synchronisée sur l'horloge du PCIe à 250MHz, sauf les MAC, synchronisés en fonctions du débit des liens réseau.
+
+B - Gestion des files
+
+Il y a deux types de files: les files de descripteurs, et de complétion. Les deux sont implémentées par des buffers circulaires.
+Les files de descripteurs sont stockées dans une mémoire accessible par DMA; les pointeurs et autres données des buffers sont aussi sauvegardées dans cette mémoire, implémentée en BRAM/URAM. Les files de complétions signalent au driver les opérations complétées sur les files de description. Elles sont plus petites et tiennent en distributed-RAM.
+
+C - Ordonnanceur
+
+L'ordonnanceur reçoit en entrée un flux d'événements concernant l'état des files. Il transmet des commandes au moteur de transmission pour gérer l'ordre dans lequel on transmet les paquets en attentes dans plusieurs files.
+
+D - Ports et Interfaces
+
+Ils ont décidé de permettre que plusieurs ports appartiennent à la même interface logique. Ainsi, on peut implémenter des algorithmes d'équilibrage de trafic en matériel de façon transparente pour l'OS.
+
+E - Chemin de données, moteur d'envoi-réception
+
+Section difficile à comprendre. Le PCIe en dur des FPGAs Ultrascale se connecte par AXI-Stream au DMA de la carte et au port de configuration AXI-Lite. Le moteur DMA a un accès aux files de descripteurs et complétion et aux moteurs d'envoi-réception à travers un arbre de multiplexeurs, qui lui permet de d'agréger/disséminer (\an{scatter/gather}) les données de plusieurs ports et plusieurs interfaces.
+
+Les moteurs d'envoi et réception contrôlent le transfert des paquets depuis la mémoire interne à travers les \an{checksums}, vers les MACs. Pour chaque paquet envoyé ou reçu avec succès, ils empilent une structure sur la file de complétion pour signaler l'avancement à l'hôte.
+
+F - Interface mémoire
+
+La mémoire interne est subdivisée en segments de 1024 bits chacun. La mémoire supporte les lectures/écritures simultanées. Elle s'interface avec le PCIe à travers une interface inventée pour cet usage: l'interface vers chaque segment ressemble au AXI-Lite, à la différence près que l'on a trois canaux au lieu de cinq: un pour les écritures (adresses et données), une pour les adresses en lecture, la dernière pour les données lues (l'AXI-Lite sépare les adresses et données d'écriture en deux canaux, et ajoute une interface pour les accusés de réception des écritures).
+
+G - Pilote Linux
+
+Le pilote expose une plage mémoire accessible par le moteur DMA de la NIC. Au démarrage, il lit les registres de configurations de la NIC, qui reflètent les valeurs des paramètres Verilog réglés dans le code à la synthèse. L'hôte adapte son comportement en fonction. Entre autres, il s'en sert pour enregistrer le bon nombre d'interfaces réseau auprès du noyau.
+
+H - Simulation
+
+La simulation de la NIC utilise des scripts Python myHDL pour modéliser le PCIe hôte, le pilote et l'IP PCIe Ultrascale. Ces modèles sont reliés à une simulation Verilog du reste de l'architecture. Avec des scripts Python on peut donc tester l'intégration du système entier en simulation; par exemple simuler l'envoi d'un paquet depuis l'hôte et vérifier qu'il ressorte correcte du port QSFP.
+
+III - Résultats
+
+Le débit est largement supérieur pour les trames \og jumbo \fg au MTU 9000 B (jusqu'à 100 Gbps Rx, et Tx) que pour le MTU standard 1500 B (environ 55 Gbps), comparé à des NICs standard. La synchronisation PTP est apparemment efficace (?).
+
+IV - TDMA
+
+La performance du TDMA se mesure par le temps (\an{skew}) qu'il faut à la NIC pour basculer d'une intervalle de temps à l'autre. La Corundum prend quelques $\mu$s.
+
+\gras{Avis:} L'article assume que l'on comprend déjà très bien le fonctionnement général d'une NIC. Il condense beaucoup d'information en peu d'espace, l'article aurait facilement pu faire 15 pages. Il n'est malheureusement pas fait mention de la manière dont on peut ajouter des fonctions personnalisées quelconques dans le chemin de données.
 
 \clearpage
