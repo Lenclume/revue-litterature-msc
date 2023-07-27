@@ -1,72 +1,68 @@
 % Résumé de lecture
 
-\subsection{The P4$\rightarrow$NetFPGA Workflow for line-rate packet processing, \cite{ibanez_p4_2019}, Ibanez, Brebner, McKeown, Zilberman, Fév. 2019}
+\subsection{The P4$\rightarrow$NetFPGA Workflow for line-rate packet processing, \cite{ibanez_p4_2019}, Ibanez, Brebner, McKeown, Zilberman, Fév. 2019, FPGA-2019}
 \gras{Pertinence:} 2
 \gras{Sujets:} P4->HDL, Outils
 
-\gras{Problématique:} Comment compiler directement le P4 pour un FPGA, sans passer par l'étape de codage HDL?
+\gras{Problématique:} Créer un flot de développement P4 pour la recherche et l'enseignement, qui utilise du matériel réel mais n'exige pas de connaissances en HDL.
 
 \gras{Prérequis:} (Optionnel) SNMP \cite{noauthor_simple_2023} \cite{digitalocean_introduction_nodate}
-
-\gras{Réponse:} Leur plateforme NetFPGA, s'appuie sur le compilateur Xilinx SDNet. Le HDL produit par SDNet cible le modèle de commutateur simple SimpleSUMESwitch, conçu d'abord pour l'enseignement.
 
 \gras{Résumé:} 
 
 I - Introduction
 
-Les versions précédentes de la NetFPGA devaient se programmer en HDL; maintenant ils proposent un flot de conception pour obtenir des designs fonctionnels en écrivant que du P4. Étant donnée que toute l'industie s'est standardisée sur P4, il faut que les cibles se standardisent dessus aussi.
+Généralités sur le langage P4 tel qu'il était en 2019. Utilité d'avoir un environnement de développement qui abstraie les détails du RTL dans l'enseignement et de la réseautique.
 
-II - La langage P4 en général
+II - Structure du P4
 
-Rappels sur ce que sont un parseur P4 et un bloc de contrôle. Rappels sur la syntaxe du parseur des états, extractions d'en-têtes, blocs de contrôle, logique \texttt{apply}, actions, tables. Idem pour les bus de métadonnées. Idem pour les \texttt{extern}.
+Exposés sur la structure du P4: structure des en-têtes, structure des tables, étages de contrôle, déparseur.
 
-III - SDNet
+Définition des \texttt{externs}, qui permet à la partie P4 d'une architecture d'interagir avec le reste du matériel. Typiquement utilisés pour implémenter des fonctions \italique{stateful}, auxquelles le P4 n'est pas encore bien adapté.
 
-Xilinx avait créé SDNet à la base pour son propre langage PX, similaire mais antécédant à P4. Avant 2019 il transpilait le P4 en PX, et depuis il compile directement le P4. Il en sort des modules Verilog (SystemVerilog sur la dernière version?), et un banc de test SystemVerilog, un pilote C pour le plan de contrôle et un modèle C++ (pourquoi faire?). Le résultats prend $\environ2\fois$ plus de ressources qu'un modèle VHDL fait à la main (!).
+Différence entre les métadonnées simples, et les métadonnées standard (\texttt{standard\_metadata}):
+\begin{itemize}
+	\item les métadonnées sont définies au choix par le programmeur P4
+	\item les métadonnées standard sont fixées dans l'architecture, et servent à interagir avec celle-ci. Par exemple, on choisit généralement le port de sortie d'un paquet en réglant \texttt{standard\_metadata.egress\_port}, et on jette un paquet \texttt{standard\_metadata.drop}
+\end{itemize}
 
-IV - La carte NetFPGA SUME 10G
+III - Présentation et historique de SDNet
 
-Les NetFPGA existante depuis 15 ans. Les commutateurs implémentés dessus utilisent l'architecture suivante:
+SDNet est l'ancien compilateur P4$\fleche$HDL de Xilinx, à l'origine conçu pour le langage PX. Le PX est un langage de traitement de paquets similaire mais antérieur au P4. Ce langage était propriétaire et a éventuellement été remplacé par le P4. SDNet prend en entrée un programme $P4_{16}$, et génère 1 - Le design Verilog à synthétiser 2 - Un environnement de vérification SystemVerilog 3 - Des pilotes logiciel pour le plan de contrôle, en langage C.
 
-$$ MAC (SFP ou DMA Rx (?)) \fleche Input arbiter \fleche Output port lookup (le P4 compilé vient dans ce bloc) \fleche Output queue (BRAM) \fleche MAC (SFP ou DMA Tx (?))$$
+IV - Proposition de valeur
 
-Le tout est contrôlé par un $\mu$Blaze connecté par AXI.
+Il a existé plusieurs itérations de la carte NetFPGA depuis 2004, mais toutes ont eu en commun d'exiger de leurs utilisateurs qu'ils maîtrisent le développement RTL. L'auteur propose plutôt de créer un flot direct P4$\fleche$HDL, qui permette de créer un prototype fonctionnel sans pour autant faire de développement matériel. Les usages cibles sont l'enseignement de la réseautique et le développement de prototypes de recherche. Cela sous-entend que le système proposé n'est pas fait pour aller en production!
 
-V - Le flot P4$\rightarrow$NetFPGA
+V - Description de l'infrastructure de développement
 
-On devrait pas avoir à toucher au code HDL, juste au P4, pour obtenir un commutateur fonctionnel. Les \texttt{externs} servent surtout à implémenter tout ce qui est \emph{stateful} - d'ailleurs ils en ont un certain nombre de déjà implémentées et utilisables pour ça. On peut ajouter nos propres externs, implémentés en HDL. Il faut ensuite les ajouter à des fichiers de configurations (lesquels?).
+La structure du P4 favorise surtout les transformations \an{stateless}. Pour faciliter le prototypage \an{stateful}, ils ont implémenté des \texttt{externs} basiques de lecture/écritures de registres. Il y a aussi un \texttt{extern} pour l'horodatage IEEE 1588. Le compilateur P4 génère un bloc de traitement intégré au design plus large \texttt{SimpleSUMESwitch}. On ne peut pas facilement passer à une autre architecture.
 
-Les simulations se font en deux étapes
+Il est possible de simuler les designs à niveaux avant de passer à l'implémentation matérielle:
 \begin{enumerate}
-	\item Lancer le testbench généré par SDNet avec des paquets générés.
-	\item Rouler une commande qui intègre le HDL SDNet sortant au NetFPGA, et le simuler.
+	\item Envoi et vérification de paquets vers un bloc de traitement P4 seul, sans le reste des modules RTL qui forment la NIC ou le commutateur complet.
+	\item Simulation de la NIC ou du commutateur entier, incluant le bloc de traitement P4 et le autres modules RTL ex. DMA, files, SerDes...
 \end{enumerate}
 
-L'outil génère aussi une API Python pour le plan de contrôle; pour être précis c'est un wrapper par-dessus les API C générées par SDNet.
+Ils ont aussi créé un API python, construite par-dessus les pilotes C, pour expérimenter plus facilement avec le plan de contrôle.
 
-Le flot de conception ne supporte que le SimpleSumeSwitch. Pour d'autres architectures, il faut remettre les mains dans le HDL.
+VI - Cas d'utilisation en recherche et enseignement
 
-VI - Cas d'utilisation en recherche en enseignement
-
-Beaucoup de travaux de recherche ont déjà été implémentées avec P4$\fleche$NetFPGA: télémétrie, \emph{load-balancer}, etc.
+Ils listent les cas remarquables d'utilisation de leur flot de développement en recherche: une implémentation de INT, de gestion de trafic proactive (adaptée automatiquement en fonction de la topologie du réseau et pas en réaction à des problèmes), d'équilibrage de trafic, et enfin de vérification du plan de données. Ils ont aussi pu enseigner un cours de réseau à Stanford à partir de cette plateforme, à des étudiants sans connaissance des FPGA.
 
 VII - Améliorations futures
 
-Ils veut intégrer P4Runtime à la chaîne d'outils à la place de l'API Python existante, et rendre l'arhcitecture plus flexible dans la NetFPGA elle-même pour qu'on soit plus limités à l'architecture SimpleSumeSwitch.
+S'ils avaient continué à développer la plateforme, ils se seraient penchés sur l'intégration de P4-Runtime et de systèmes d'exploitations pour commutateurs utilisant P4-Runtime, entre autres ONOS. Ils auraient aussi facilité la création de nouvelles architectures.
 
 VIII - Comparaisons aux solution P4-à-HDL existantes
 
-Il y a eu beaucoup de tentativves de faire de la compilation P4 par l'intermédiaire de HDL: C, C++, Bluespec. Celui de Benacek \og P4-to-HDL \fg est en source fermée donc pas utilisable par la communauté.
+Les autres plateformes de synthèse P4 pour FPGA utilisent un langage HLS intermédiaire: C++ ou encore Bluespec. Ces HLS ne donnent pourtant pas d'abstractions qui soient réellement utile au traitement de paquets. Globalement, les systèmes concurrents sont soit propriétaires, soit des travaux de recherche qui ne présentent pas comme des outils de développement pratiques.
 
-IX - Comment commencer à l'utiliser: suivre les tutoriels en ligne pour faire fonctionner la chaîne d'outils. Ils espèrent avoir des contributions.
+IX-X - Conclusion: La NetFPGA remplit bien son rôle d'intermédiaire entre l'émulation logicielle et les ASICs chers.
 
-X - Conclusion: La NetFPGA remplit bien son rôle d'intermédiaire entre l'émulation logicielle et les ASICs très chers.
+\gras{Avis:} Les auteurs comparent leur solution aux flots P4->HLS->FPGA existants (ils citent Jeferson \cite{santiago_da_silva_p4-compatible_2018}). Leur solution se démarque par sa facilité d'utilisation: elle est intégrée aux outils et passe directement du P4 au FPGA sans passer par l'intermédiaire d'un HLS.
+Cependant, nous sommes aujourd'hui 4 ans après la publication du papier, et l'outil n'a pas été maintenu depuis ce temps-là... le compilateur SDNet est devenu obsolète et non-téléchargeable, et les développeurs de son successeur VitisNetP4 n'ont pas l'intention de le faire fonctionner sur la famille Virtex-7, qu'utilise la NetFPGA-SUME: \url{https://support.xilinx.com/s/question/0D74U000007t5w0SAA/}.
 
-\gras{Avis:} Les auteurs comparent leur solution aux flots P4->HLS->FPGA existants (ils citent Jeferson \cite{santiago_da_silva_p4-compatible_2018}). Leur solution se démarque par sa facilité d'utilisation: elle est intégrée aux outils et passe directement du P4 au FPGA sans passer par l'intermédiaire d'un HLS, et maintenue sur le long terme (on le saura!)
-
-\boite{
-\gras{Aparté:} Le SNMP (\emph{Le Simple Network Management Protocol}. Un outil standard de gestion de réseau. Il est utilisé pour créer des outils plus haut-niveau. Un \emph{manager} gère un ensemble d'agents SNMP, à travers un jeu de (7) commandes de base. Les agents sont adressés avec une notation en décimal pointé (MIB, \emph{Management Information Base}). Ça s'installe relativement facilement sur des serveurs \cite{digitalocean_how_nodate}.
-
-}
+On est obligés de ressortir nos anciens compilateurs pour ne pas que nos cartes à 7000\$ ne deviennent pas des presse-papiers.
 
 \clearpage
