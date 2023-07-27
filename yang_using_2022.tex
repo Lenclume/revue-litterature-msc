@@ -1,0 +1,50 @@
+% Résumé de lecture
+
+\subsection{Using Trio: Juniper Network's programmable chipset - for emerging in-network applications, Yang et al., Août 2022, SIGCOMM-2022}
+\gras{Pertinence:} 2
+\gras{Sujets:} Architecture des commutateurs, DSL
+
+\gras{Problématique:} Obtenir un commutateur adapté au calcul-sur-réseau, plus adapté que le Tofino.
+
+\gras{Prérequis:} Aucun
+
+\gras{Réponse brève:} Leur \an{chipset} \og Trio \fg n'utilise pas un gigantesque pipeline matériel comme le Tofino, mais plutôt un grand nombre de processeurs indépendants, qui exécutent en parallèle des instructions logicielles. Ces programmes utilisent un jeu d'instructions conçu spécialement pour le traitement de paquets. Le traitement se reconfigure donc en chargeant un nouveau logiciel; pas besoin de reconfigurer le matériel lui-même.
+
+Ils ont créé leur propre DSL pour le programmer, le \og Microcode \fg \footnote{le langage est très mal nommé puisque le mot \og microcode \fg est déjà pris pour autre chose depuis au moins un demi-siècle}. Ils ont un compilateur pour ce langage.
+
+II - Architecture du Trio
+
+Le \an{chipset} `Trio' existe depuis 2009 et en est à sa sixième itération. Ils séparent la description de l'architecture selon ses trois unités fonctionnelles principales: 1 - Le \an{packet forwarding engine} (PFE), 2 - Le \an{packet processing engine} (PCE), 3 - la mémoire partagée.
+
+III - Développement logiciel
+
+Leurs processeurs personnalisés se programment avec leur DSL `Microcode', dont la syntaxe ressemble au C. Ils prévoient qu'un développeur ajoute ses applications réseau par-dessus une base de code existante. Leur compilateur le réduit au langage machine et s'occupe aussi de la gestion de la mémoire partagée.
+
+IV - Exemple d'application \# 1: Aggrégation de modèle de réseau de neurones.
+
+L'entraînement d'un réseau de neurones sur un système distribué se fait généralement en séparant la tâche parmi les hôtes du système, puis en synchronisant (?) les hôtes régulièrement. Après chaque étape de traitement, les hôtes se partagent les résultats de leurs calculs pour leur agrégation; générant au passage un grand trafic réseau.
+
+Les auteurs ont développé une application Trio qui réduit ce trafic en agrégeant les résultats directement sur le commutateur. Une fois l’agrégation terminée, le Trio diffuse (\an{multicast}) le résultat aux hôtes.
+
+V - Exemple d'application \# 2: Gestion des retardataire (\an{stragglers}) dans l'entraînement des réseaux de neurones
+
+Toujours en entraînement, chaque étape ne peut arriver à l'étape d’agrégation que lorsque tout les hôtes ont terminé leur part du calcul - la performance est limitée par maillon le plus faible. Or, le temps de calcul a toujours un variabilité non-déterministe sur un hôte. Globalement, l'attente de retardataires peut ralentir un système par un facteur allant jusqu'à $\fois8$.
+
+L’agrégateur sur le Trio est en bonne position pour détecter les retardataires, qui tardent à lui envoyer leurs résultats. Il peut mitiger leur impact en décidant de passer à l'agrégation sans attendre les derniers résultats manquants\footnote{au prix d'un peu de précision, j'imagine}.
+
+VI - Évaluation des performances
+
+L'utilisation de leur matériel et de leur programme accélère le temp d'entraînement de $\fois 1$ (aucun gain), jusqu'à $\fois 1.6$ quand la probabilité d'une hôte retardataire est élevée (16\%). Ils ont testé leur infrastructure sur le trois modèles de DNN différents (ResNet 50, DenseNet161, VGG11).
+
+VII - Usages futurs
+
+Il voient de futures applications possibles en la télémétrie et en sécurité. Ils aimeraient améliorer la gestion des pics de trafic, ajouter un flot de développement P4, et développer un autre DSL, qui exploite pleinement les possibilités de leur architecture.
+
+VIII - Travaux existants
+
+Il existe déjà des aggrégateurs de réseau de neurones, sur le Tofino ou sur FPGA (hors-bande). Mellanox a aussi sa propre solution propriétaire. Il existe d'autres méthodes que celles proposées pour gérer les retardataires en entraînement de modèles. Il y a aussi d'autres architectures de commutateurs programmables, en plus du Trio et PISA; par exemple dRMT.
+
+\gras{Avis:} Ils ont une architecture radicalement différentes des commutateurs programmables P4 auxquels on est habitués, beaucoup plus flexible que le Tofino. Cependant, sur leur banc de test, ils ont quand même dû interposer un Tofino entre leur grappe de serveurs et les Trio pour obtenir une bonne performance. Leur architecture parait très adaptée au calcul-sur-réseau, mais est-elle adaptée à la commutation à usage général? À voir.
+
+
+\clearpage
